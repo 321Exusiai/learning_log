@@ -1,0 +1,125 @@
+{% extends "learning_logs/base.html" %}
+
+{% block title %}
+{% with topic_text=topic.text %}
+Edit Entry - {{ topic_text }}
+{% endwith %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .file-input {
+        margin: 1rem 0;
+        padding: 0.8rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    textarea {
+        min-height: 200px;
+        width: 100%;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        resize: vertical;
+    }
+
+    textarea:focus,
+    .file-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+    }
+
+    .file-preview {
+        margin: 1rem 0;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        background: #f8fafc;
+    }
+
+    .image-preview {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: var(--radius-md);
+        margin: 0.5rem 0;
+    }
+</style>
+
+<div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">
+    <a href="{% url 'learning_logs:topic' topic.id %}" class="small-link" style="margin-bottom: 1rem; display: block;">←
+        Back to Topic</a>
+
+    <h2 style="font-size: 2rem; margin-bottom: 1.5rem;">Edit Entry</h2>
+    {% with topic_text=topic.text %}
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">Topic: <strong>{{ topic_text }}</strong></p>
+    {% endwith %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label">Entry Content</label>
+            {{ form.text }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">{{ form.image.label }}</label>
+            {{ form.image }}
+
+            <!-- 显示已上传的图片 -->
+            {% if entry.image %}
+            <div class="file-preview">
+                <p style="font-size: 0.9rem; margin: 0 0 0.5rem 0;">Current image:</p>
+                <img src="{{ entry.image.url }}" alt="Entry image" class="image-preview"
+                    onError="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'; this.alt='Image not found'">
+                <p style="font-size: 0.85rem; color: #ef4444; margin-top: 0.5rem;">
+                    Check the "Clear" box above to delete this image
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">{{ form.attachment.label }}</label>
+            {{ form.attachment }}
+
+            <!-- 显示已上传的附件 -->
+            {% if entry.attachment %}
+            <div class="file-preview">
+                <p style="font-size: 0.9rem; margin: 0;">Current attachment:</p>
+                <a href="{{ entry.attachment.url }}" target="_blank"
+                    style="color: var(--primary); text-decoration: underline;">
+                    {% with attach_name=entry.get_attachment_name %}
+                    {{ attach_name }}
+                    {% endwith %}
+                </a>
+                <p style="font-size: 0.85rem; color: #ef4444; margin-top: 0.5rem;">
+                    Check the "Clear" box above to delete this attachment
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button type="submit" class="nav-btn btn-primary">Save Changes</button>
+            <a href="{% url 'learning_logs:topic' topic.id %}" class="nav-btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

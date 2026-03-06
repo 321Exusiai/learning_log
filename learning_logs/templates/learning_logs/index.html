@@ -1,0 +1,50 @@
+{% extends "learning_logs/base.html" %}
+
+{% block title %}Welcome to Learning Log{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 2rem 0;">
+    <span class="badge" style="margin-bottom: 1.5rem; font-size: 0.85rem; padding: 0.5rem 1.25rem;">✨ Track your
+        growth</span>
+    <h1 style="font-size: 3.5rem; line-height: 1.1; margin-bottom: 2rem;">
+        Capture knowledge,<br>one log at a time.
+    </h1>
+    <p style="max-width: 600px; margin: 0 auto 3rem; font-size: 1.25rem; color: var(--text-muted);">
+        A sleek and simple way to document your learning journey. Organize topics, jot down insights, and watch your
+        expertise grow.
+    </p>
+
+    {% if not user.is_authenticated %}
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="{% url 'accounts:register' %}" class="nav-btn btn-primary"
+            style="padding: 1rem 2rem; font-size: 1.1rem;">Start Your Log</a>
+        <a href="{% url 'accounts:login' %}" class="nav-btn btn-outline"
+            style="padding: 1rem 2rem; font-size: 1.1rem;">Login to Continue</a>
+    </div>
+    {% else %}
+    <a href="{% url 'learning_logs:topics' %}" class="nav-btn btn-primary"
+        style="padding: 1rem 2rem; font-size: 1.1rem;">View Your Topics</a>
+    {% endif %}
+</div>
+
+<div class="grid" style="margin-top: 5rem; grid-template-columns: repeat(3, 1fr);">
+    <div style="padding: 1.5rem;">
+        <div style="font-size: 2rem; margin-bottom: 1rem;">📂</div>
+        <h4 style="margin-bottom: 0.75rem;">Structured Topics</h4>
+        <p style="font-size: 0.95rem; line-height: 1.5;">Categorize your learning into specific subjects for easy
+            navigation.</p>
+    </div>
+    <div style="padding: 1.5rem;">
+        <div style="font-size: 2rem; margin-bottom: 1rem;">✍️</div>
+        <h4 style="margin-bottom: 0.75rem;">Daily Insights</h4>
+        <p style="font-size: 0.95rem; line-height: 1.5;">Add detailed entries whenever you learn something new or solve
+            a problem.</p>
+    </div>
+    <div style="padding: 1.5rem;">
+        <div style="font-size: 2rem; margin-bottom: 1rem;">🚀</div>
+        <h4 style="margin-bottom: 0.75rem;">Fast & Secure</h4>
+        <p style="font-size: 0.95rem; line-height: 1.5;">Your progression is saved securely, allowing you to reflect on
+            your path.</p>
+    </div>
+</div>
+{% endblock %}

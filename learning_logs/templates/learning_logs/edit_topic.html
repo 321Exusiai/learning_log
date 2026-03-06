@@ -1,0 +1,23 @@
+{% extends "learning_logs/base.html" %}
+
+{% block title %}编辑主题 - Learning Log{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <a href="{% url 'learning_logs:topics' %}" class="small-link" style="margin-bottom: 1rem; display: block;">← Back to
+        All Topics</a>
+    <h2 style="font-size: 2rem; margin-bottom: 1.5rem;">编辑主题：{{ topic.text }}</h2>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label class="form-label">主题名称</label>
+        {{ form.text }}
+    </div>
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <button type="submit" class="nav-btn btn-primary">保存修改</button>
+        <a href="{% url 'learning_logs:topics' %}" class="nav-btn btn-outline">取消</a>
+    </div>
+</form>
+{% endblock %}

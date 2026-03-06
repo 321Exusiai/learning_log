@@ -1,0 +1,251 @@
+{% extends "learning_logs/base.html" %}
+
+{% block title %}My Topics - Learning Log{% endblock %}
+
+{% block content %}
+<!-- 自定义样式：放在最前面，控制搜索框+分页的交互 -->
+<style>
+    /* 搜索框样式 */
+    .search-input {
+        flex: 1;
+        padding: 0.8rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .search-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        transform: translateY(-1px);
+    }
+
+    .search-input:hover {
+        border-color: #cbd5e1;
+    }
+
+    /* 分页按钮样式 */
+    .pagination-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        background: white;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pagination-btn:hover {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .pagination-btn:active {
+        transform: translateY(0);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .pagination-current {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        font-weight: 600;
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        color: #94a3b8;
+    }
+
+    /* 搜索按钮特殊样式 */
+    .search-btn {
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.15);
+    }
+
+    .search-btn:active {
+        transform: translateY(0);
+    }
+
+    /* 清空按钮样式 */
+    .clear-btn {
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .clear-btn:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div
+    style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <span class="badge" style="margin-bottom: 0.75rem;">📚 Overview</span>
+        <h2 style="font-size: 2.5rem; margin: 0;">Your Learning Journey</h2>
+        <p style="margin: 0.5rem 0 0; font-size: 1rem;">Explore all the subjects you've been capturing.</p>
+    </div>
+    <a href="{% url 'learning_logs:new_topic' %}" class="nav-btn btn-primary">Create New Topic</a>
+</div>
+
+<!-- 搜索框区域（加交互样式） -->
+<div style="margin-bottom: 2rem; max-width: 600px;">
+    <form method="get" action="{% url 'learning_logs:topics' %}"
+        style="display: flex; gap: 0.5rem; align-items: center;">
+        {% with search_placeholder="Search topics or entries..." %}
+        <input type="text" name="q" placeholder="{{ search_placeholder }}" value="{{ search_query }}"
+            class="search-input">
+        {% endwith %}
+
+        <button type="submit" class="nav-btn btn-primary search-btn">
+            🔍 Search
+        </button>
+
+        {% if search_query %}
+        <a href="{% url 'learning_logs:topics' %}" class="nav-btn btn-outline clear-btn">
+            ❌ Clear
+        </a>
+        {% endif %}
+    </form>
+
+    {% if search_query %}
+    {% with results_count=page_obj.paginator.count %}
+    <p style="margin-top: 0.8rem; font-size: 0.9rem; color: var(--text-muted);">
+        Showing results for: <strong style="color: var(--primary);">{{ search_query }}</strong>
+        ({{ results_count }} topic{{ results_count|pluralize }} found)
+    </p>
+    {% endwith %}
+    {% endif %}
+</div>
+
+<!-- 主题列表 -->
+<div class="grid">
+    {% for topic in page_obj.object_list %}
+    <div class="card"
+        style="padding: 2rem; height: 100%; transition: var(--transition-smooth); border: 1px solid rgba(0,0,0,0.05);"
+        onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='var(--shadow-lg)'; this.style.borderColor='var(--primary)';"
+        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-lg)'; this.style.borderColor='rgba(0,0,0,0.05)';">
+        <div style="font-size: 1.5rem; margin-bottom: 1rem;">📁</div>
+        {% with topic_text=topic.text %}
+        <h4 style="margin-bottom: 0.5rem; color: var(--primary);">{{ topic_text }}</h4>
+        {% endwith %}
+        {% with topic_date=topic.date_added|date:"Y年m月d日" %}
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Added on {{ topic_date }}</p>
+        {% endwith %}
+
+        <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+            {% with topic_id=topic.id %}
+            <a href="{% url 'learning_logs:topic' topic_id %}" class="nav-btn btn-primary"
+                style="padding: 0.5rem 1rem; font-size: 0.85rem;">查看笔记</a>
+            <a href="{% url 'learning_logs:edit_topic' topic_id %}" class="nav-btn btn-outline"
+                style="padding: 0.5rem 1rem; font-size: 0.85rem;">编辑主题</a>
+            <form action="{% url 'learning_logs:delete_topic' topic_id %}" method="post" style="display: inline;"
+                onsubmit="return confirm('确定要删除这个主题吗？该主题下的所有笔记都会被永久删除！');">
+                {% csrf_token %}
+                <button type="submit" class="nav-btn"
+                    style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #ef4444; color: white; border: none;">删除主题</button>
+            </form>
+            {% endwith %}
+        </div>
+    </div>
+    {% empty %}
+    <div
+        style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; background: rgba(0,0,0,0.02); border-radius: var(--radius-lg); border: 2px dashed #e2e8f0;">
+        <p style="font-size: 1.1rem; color: var(--text-muted);">
+            {% if search_query %}
+            No results found for "<strong style="color: var(--primary);">{{ search_query }}</strong>". Try a different
+            keyword!
+            {% else %}
+            No topics added yet. Why not start a new one?
+            {% endif %}
+        </p>
+        <a href="{% url 'learning_logs:new_topic' %}" class="nav-btn btn-outline" style="margin-top: 1rem;">Add your
+            first topic</a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 分页区域（全新样式） -->
+{% if page_obj.has_other_pages %}
+<div
+    style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 3rem; flex-wrap: wrap; padding: 1rem; border-radius: var(--radius-lg); background: #f8fafc;">
+    <!-- 首页按钮 -->
+    {% if page_obj.has_previous %}
+    <a href="?q={{ search_query }}&page=1" class="pagination-btn">
+        ⏮️ 首页
+    </a>
+    {% else %}
+    <button class="pagination-btn" disabled>
+        ⏮️ 首页
+    </button>
+    {% endif %}
+
+    <!-- 上一页按钮 -->
+    {% if page_obj.has_previous %}
+    {% with prev_page=page_obj.previous_page_number %}
+    <a href="?q={{ search_query }}&page={{ prev_page }}" class="pagination-btn">
+        ⏪ 上一页
+    </a>
+    {% endwith %}
+    {% else %}
+    <button class="pagination-btn" disabled>
+        ⏪ 上一页
+    </button>
+    {% endif %}
+
+    <!-- 当前页码 -->
+    {% with current_page=page_obj.number total_pages=page_obj.paginator.num_pages %}
+    <span class="pagination-btn pagination-current">
+        {{ current_page }} / {{ total_pages }}
+    </span>
+    {% endwith %}
+
+    <!-- 下一页按钮 -->
+    {% if page_obj.has_next %}
+    {% with next_page=page_obj.next_page_number %}
+    <a href="?q={{ search_query }}&page={{ next_page }}" class="pagination-btn">
+        下一页 ⏩
+    </a>
+    {% endwith %}
+    {% else %}
+    <button class="pagination-btn" disabled>
+        下一页 ⏩
+    </button>
+    {% endif %}
+
+    <!-- 末页按钮 -->
+    {% if page_obj.has_next %}
+    {% with last_page=page_obj.paginator.num_pages %}
+    <a href="?q={{ search_query }}&page={{ last_page }}" class="pagination-btn">
+        末页 ⏭️
+    </a>
+    {% endwith %}
+    {% else %}
+    <button class="pagination-btn" disabled>
+        末页 ⏭️
+    </button>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
