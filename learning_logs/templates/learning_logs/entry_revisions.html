@@ -1,0 +1,67 @@
+{% extends "learning_logs/base.html" %}
+
+{% block title %}修改历史 - {{ entry.text|truncatewords:5 }}{% endblock %}
+
+{% block content %}
+<style>
+    .revision-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        background: var(--card-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+    }
+    .revision-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .revision-date {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+    .revision-author {
+        font-size: 0.85rem;
+        color: var(--primary);
+    }
+    .revision-content {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: var(--text-main);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+</style>
+
+<div style="max-width: 900px; margin: 0 auto; padding: 2rem 1rem;">
+    <a href="{% url 'learning_logs:edit_entry' topic.id entry.id %}" class="small-link" style="margin-bottom: 1rem; display: block;">← 返回编辑</a>
+    
+    <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">📜 修改历史</h2>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">主题: <strong>{{ topic.text }}</strong></p>
+    
+    {% if revisions %}
+        {% for revision in revisions %}
+        <div class="revision-card">
+            <div class="revision-header">
+                <span class="revision-date">📅 {{ revision.created_at|date:"Y年m月d日 H:i:s" }}</span>
+                <span class="revision-author">👤 {% firstof revision.created_by.username "未知用户" %}</span>
+            </div>
+            <div class="revision-content">{{ revision.text|linebreaks }}</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <p style="font-size: 1.2rem;">📭 暂无修改历史</p>
+            <p>这是该笔记的第一个版本</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

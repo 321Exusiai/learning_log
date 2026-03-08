@@ -1,4 +1,5 @@
 {% extends "learning_logs/base.html" %}
+{% load learning_logs_tags %}
 
 {% block title %}
 {% with topic_text=topic.text %}
@@ -7,8 +8,227 @@
 {% endblock %}
 
 {% block content %}
+<!-- 局部样式：排序控件 - 亚克力滑动效果 -->
+<style>
+    .sort-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        flex-wrap: wrap;
+    }
+
+    .sort-label {
+        font-weight: 500;
+        margin-right: 0.5rem;
+    }
+
+    /* 亚克力容器 */
+    .sort-container {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: none;
+        border-radius: var(--radius-full);
+        padding: 4px;
+        box-shadow: 
+            0 4px 20px rgba(31, 38, 135, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        position: relative;
+        isolation: isolate;
+    }
+
+    /* 滑动背景框 */
+    .sort-slider {
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        border-radius: var(--radius-full);
+        box-shadow: 
+            0 4px 15px rgba(99, 102, 241, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        z-index: 0;
+    }
+
+    /* 排序按钮 */
+    .sort-pill {
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        color: var(--text-main);
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        position: relative;
+        z-index: 1;
+        white-space: nowrap;
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 80px;
+    }
+
+    .sort-pill:hover {
+        color: var(--primary);
+    }
+
+    .sort-pill-active {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .sort-pill-active:hover {
+        color: #ffffff;
+    }
+
+    /* 内容区域动画 */
+    .entries-container {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .entries-container.loading {
+        opacity: 0.5;
+        transform: translateY(10px);
+    }
+
+    /* Markdown 内容样式 */
+    .markdown-content h1, .markdown-content h2, .markdown-content h3,
+    .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .markdown-content h1 { font-size: 1.8rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; }
+    .markdown-content h2 { font-size: 1.5rem; }
+    .markdown-content h3 { font-size: 1.25rem; }
+
+    .markdown-content p { margin: 0.75rem 0; }
+
+    .markdown-content code {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--primary);
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'Fira Code', 'Consolas', monospace;
+        font-size: 0.9em;
+    }
+
+    .markdown-content pre {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+    }
+
+    .markdown-content pre code {
+        background: none;
+        padding: 0;
+        color: var(--text-main);
+    }
+
+    .markdown-content blockquote {
+        border-left: 4px solid var(--primary);
+        margin: 1rem 0;
+        padding: 0.5rem 1rem;
+        background: rgba(99, 102, 241, 0.05);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .markdown-content ul, .markdown-content ol {
+        margin: 0.75rem 0;
+        padding-left: 1.5rem;
+    }
+
+    .markdown-content li { margin: 0.25rem 0; }
+
+    .markdown-content a {
+        color: var(--primary);
+        text-decoration: none;
+        border-bottom: 1px dashed var(--primary);
+        transition: var(--transition-smooth);
+    }
+
+    .markdown-content a:hover {
+        color: var(--secondary);
+        border-color: var(--secondary);
+    }
+
+    .markdown-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+    }
+
+    .markdown-content th, .markdown-content td {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 0.5rem;
+        text-align: left;
+    }
+
+    .markdown-content th {
+        background: rgba(99, 102, 241, 0.1);
+        font-weight: 600;
+    }
+
+    .markdown-content hr {
+        border: none;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        margin: 2rem 0;
+    }
+
+    .markdown-content img {
+        max-width: 100%;
+        border-radius: var(--radius-md);
+        margin: 1rem 0;
+    }
+
+    /* 背景纹理 */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    /* 网格纹理叠加 */
+    body::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+        z-index: -1;
+    }
+</style>
+
 <!-- 顶部区域 -->
-<div style="margin-bottom: 3rem; padding: 0 1rem;">
+<div style="margin-bottom: 3rem; padding: 0 2rem;">
     <a href="{% url 'learning_logs:topics' %}" class="small-link" style="margin-bottom: 1rem; display: block;">← Back to
         All Topics</a>
     <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
@@ -19,16 +239,38 @@
             {% with topic_text=topic.text %}
             <h2 style="font-size: 2.5rem; margin: 0; line-height: 1.2;">{{ topic_text }}</h2>
             {% endwith %}
+
+            <!-- 排序条：亚克力滑动效果 -->
+            <div class="sort-bar">
+                <span class="sort-label">排序：</span>
+                <div class="sort-container" id="sortContainer">
+                    <div class="sort-slider" id="sortSlider"></div>
+                    <a href="?sort=date_desc" data-sort="date_desc"
+                        class="sort-pill {% if sort == 'date_desc' or sort == 'desc' or not sort %}sort-pill-active{% endif %}">最新在前</a>
+                    <a href="?sort=date_asc" data-sort="date_asc"
+                        class="sort-pill {% if sort == 'date_asc' or sort == 'asc' %}sort-pill-active{% endif %}">最早在前</a>
+                    <a href="?sort=len_asc" data-sort="len_asc"
+                        class="sort-pill {% if sort == 'len_asc' %}sort-pill-active{% endif %}">内容短→长</a>
+                    <a href="?sort=len_desc" data-sort="len_desc"
+                        class="sort-pill {% if sort == 'len_desc' %}sort-pill-active{% endif %}">内容长→短</a>
+                </div>
+            </div>
         </div>
         {% with topic_id=topic.id %}
         <a href="{% url 'learning_logs:new_entry' topic_id %}" class="nav-btn btn-primary"
             style="white-space: nowrap;">Add New Entry</a>
+        <div style="display: flex; gap: 0.5rem; margin-left: 0.5rem;">
+            <button onclick="exportEntries('txt')" class="nav-btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📄 TXT</button>
+            <button onclick="exportEntries('md')" class="nav-btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📝 MD</button>
+            <button onclick="exportEntries('pdf')" class="nav-btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📕 PDF</button>
+            <a href="{% url 'learning_logs:share_topic' topic_id %}" target="_blank" class="nav-btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📤 分享</a>
+        </div>
         {% endwith %}
     </div>
 </div>
 
 <!-- 条目列表 -->
-<div style="display: flex; flex-direction: column; gap: 2rem; padding: 0 1rem; max-width: 1200px; margin: 0 auto;">
+<div id="entriesContainer" class="entries-container" style="display: flex; flex-direction: column; gap: 2rem; padding: 0 2rem; max-width: 1200px; margin: 0 auto;">
     {% for entry in page_obj.object_list %}
     <div class="card"
         style="padding: 2.5rem; border: 1px solid rgba(0,0,0,0.03); background: white; border-radius: var(--radius-lg); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
@@ -36,7 +278,7 @@
             style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 1rem;">
             <!-- 日期 -->
             {% with entry_date=entry.date_added|date:"Y年m月d日 H:i" %}
-            <p style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin: 0;">{{ entry_date }}</p>
+            <p class="entry-date" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin: 0;">{{ entry_date }}</p>
             {% endwith %}
 
             <!-- 操作按钮 -->
@@ -44,49 +286,57 @@
                 {% with topic_id=topic.id entry_id=entry.id %}
                 <a href="{% url 'learning_logs:edit_entry' topic_id entry_id %}" class="small-link"
                     style="font-size: 0.8rem;">Edit Entry</a>
+                <a href="{% url 'learning_logs:entry_revisions' topic_id entry_id %}" class="small-link"
+                    style="font-size: 0.8rem;">📜 History</a>
                 <form action="{% url 'learning_logs:delete_entry' topic_id entry_id %}" method="post"
                     style="display: inline;" onsubmit="return confirm('确定要删除这条笔记吗？删除后无法恢复！');">
                     {% csrf_token %}
-                    <button type="submit" class="btn-danger-text"
-                        style="font-size: 0.8rem; border: none; background: none; padding: 0; cursor: pointer; color: #ef4444;">Delete
-                        Entry</button>
+                    <button type="submit" class="nav-btn btn-danger"
+                        style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Delete Entry</button>
                 </form>
                 {% endwith %}
             </div>
         </div>
 
-        <!-- 条目内容 -->
+        <!-- 笔记文本 (Markdown 渲染) -->
+        {% if not entry.is_image_only %}
         {% with entry_text=entry.text %}
-        <div style="font-size: 1.1rem; line-height: 1.7; color: var(--text-main); white-space: pre-wrap;">{{ entry_text
-            }}</div>
+        <div class="markdown-content" style="font-size: 1.05rem; line-height: 1.8; color: var(--text-main);">{{ entry_text|markdown }}</div>
+        {% endwith %}
+        {% endif %}
+
+        <!-- 新增：多图片预览 -->
+        {% with entry_images=entry.images.all %}
+        {% if entry_images %}
+        <div style="margin-top: 2rem; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
+            <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-muted); margin: 0 0 1rem 0;">Attached Images ({{ entry_images|length }}):</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                {% for img in entry_images %}
+                <div style="max-width: 200px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid #e2e8f0;">
+                    <img src="{{ img.image.url }}" alt="Entry image" style="width: 100%; height: auto;"
+                         onError="this.src='https://via.placeholder.com/200x150?text=Image+Lost';">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         {% endwith %}
 
-        <!-- ================ 新增：图片+附件显示 从这里开始 ================ -->
-        <!-- 显示图片 -->
-        {% if entry.image %}
-        <div style="margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1.5rem;">
-            <p style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin: 0 0 0.5rem 0;">Attached
-                Image:</p>
-            <img src="{{ entry.image.url }}" alt="Entry image"
-                style="max-width: 100%; max-height: 400px; border-radius: var(--radius-md);"
-                onError="this.src='https://via.placeholder.com/400x200?text=Image+Not+Found'; this.alt='Image not found'">
+        <!-- 新增：多附件预览 -->
+        {% with entry_attachments=entry.attachments.all %}
+        {% if entry_attachments %}
+        <div style="margin-top: 2rem; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
+            <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-muted); margin: 0 0 1rem 0;">Attached Files ({{ entry_attachments|length }}):</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                {% for attach in entry_attachments %}
+                <a href="{{ attach.attachment.url }}" target="_blank" class="nav-btn btn-outline" style="padding: 0.6rem 1rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                    📎 {% with attach_name=attach.get_attachment_name %}{{ attach_name|truncatechars:20 }}{% endwith %}
+                </a>
+                {% endfor %}
+            </div>
         </div>
         {% endif %}
-
-        <!-- 显示附件 -->
-        {% if entry.attachment %}
-        <div style="margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1.5rem;">
-            <p style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin: 0 0 0.5rem 0;">Attached
-                File:</p>
-            <a href="{{ entry.attachment.url }}" target="_blank" class="nav-btn btn-outline"
-                style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                📎 {% with attach_name=entry.get_attachment_name %}
-                {{ attach_name }}
-                {% endwith %}
-            </a>
-        </div>
-        {% endif %}
-        <!-- ================ 新增：图片+附件显示 到这里结束 ================ -->
+        {% endwith %}
     </div>
     {% empty %}
     <!-- 空状态 -->
@@ -107,10 +357,10 @@
 <div
     style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 3rem; padding: 0 1rem; flex-wrap: wrap;">
     {% if page_obj.has_previous %}
-    <a href="?page=1" class="nav-btn btn-outline"
+    <a href="?sort={{ sort }}&page=1" class="nav-btn btn-outline"
         style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">首页</a>
     {% with prev_page=page_obj.previous_page_number %}
-    <a href="?page={{ prev_page }}" class="nav-btn btn-outline"
+    <a href="?sort={{ sort }}&page={{ prev_page }}" class="nav-btn btn-outline"
         style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">上一页</a>
     {% endwith %}
     {% endif %}
@@ -124,12 +374,224 @@
 
     {% if page_obj.has_next %}
     {% with next_page=page_obj.next_page_number last_page=page_obj.paginator.num_pages %}
-    <a href="?page={{ next_page }}" class="nav-btn btn-outline"
+    <a href="?sort={{ sort }}&page={{ next_page }}" class="nav-btn btn-outline"
         style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">下一页</a>
-    <a href="?page={{ last_page }}" class="nav-btn btn-outline"
+    <a href="?sort={{ sort }}&page={{ last_page }}" class="nav-btn btn-outline"
         style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">末页</a>
     {% endwith %}
     {% endif %}
 </div>
 {% endif %}
+
+<!-- 排序滑动动画脚本 -->
+<script>
+(function() {
+    const container = document.getElementById('sortContainer');
+    const slider = document.getElementById('sortSlider');
+    const pills = container.querySelectorAll('.sort-pill');
+    const entriesContainer = document.getElementById('entriesContainer');
+    
+    function updateSlider(activePill) {
+        if (activePill && slider) {
+            const containerRect = container.getBoundingClientRect();
+            const pillRect = activePill.getBoundingClientRect();
+            
+            const left = pillRect.left - containerRect.left;
+            const width = pillRect.width;
+            
+            slider.style.left = left + 'px';
+            slider.style.width = width + 'px';
+            slider.style.opacity = '1';
+        }
+    }
+    
+    // 初始化 - 找到当前激活的按钮
+    const initialActive = container.querySelector('.sort-pill-active');
+    if (initialActive) {
+        updateSlider(initialActive);
+    }
+    
+    // 点击事件处理
+    pills.forEach(pill => {
+        pill.addEventListener('click', function(e) {
+            e.preventDefault();
+            const sortValue = this.getAttribute('data-sort');
+            
+            // 如果点击的是当前激活的按钮，不做任何操作
+            if (this.classList.contains('sort-pill-active')) {
+                return;
+            }
+            
+            // 移除所有 active 类
+            pills.forEach(p => p.classList.remove('sort-pill-active'));
+            // 添加 active 类到当前按钮
+            this.classList.add('sort-pill-active');
+            
+            // 更新滑块位置
+            updateSlider(this);
+            
+            // 添加加载状态
+            entriesContainer.classList.add('loading');
+            
+            // 使用 AJAX 获取新数据
+            fetch(`?sort=${sortValue}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // 创建临时元素解析 HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newEntries = doc.getElementById('entriesContainer');
+                
+                if (newEntries) {
+                    // 淡出旧内容
+                    entriesContainer.style.opacity = '0';
+                    entriesContainer.style.transform = 'translateY(-10px)';
+                    
+                    setTimeout(() => {
+                        // 更新内容
+                        entriesContainer.innerHTML = newEntries.innerHTML;
+                        entriesContainer.classList.remove('loading');
+                        
+                        // 淡入新内容
+                        entriesContainer.style.opacity = '1';
+                        entriesContainer.style.transform = 'translateY(0)';
+                        
+                        // 更新 URL（不刷新页面）
+                        history.pushState({ sort: sortValue }, '', `?sort=${sortValue}`);
+                    }, 200);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                entriesContainer.classList.remove('loading');
+                // 如果 AJAX 失败，使用传统跳转
+                window.location.href = `?sort=${sortValue}`;
+            });
+        });
+    });
+    
+    // 窗口大小改变时更新
+    window.addEventListener('resize', function() {
+        const activePill = container.querySelector('.sort-pill-active');
+        updateSlider(activePill);
+    });
+    
+    // 浏览器前进/后退按钮处理
+    window.addEventListener('popstate', function(e) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sortValue = urlParams.get('sort') || 'date_desc';
+        
+        // 更新按钮状态
+        pills.forEach(p => {
+            p.classList.remove('sort-pill-active');
+            if (p.getAttribute('data-sort') === sortValue) {
+                p.classList.add('sort-pill-active');
+                updateSlider(p);
+            }
+        });
+        
+        // 重新加载内容
+        entriesContainer.classList.add('loading');
+        fetch(`?sort=${sortValue}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newEntries = doc.getElementById('entriesContainer');
+            
+            if (newEntries) {
+                entriesContainer.innerHTML = newEntries.innerHTML;
+                entriesContainer.classList.remove('loading');
+            }
+        });
+    });
+    
+    // 导出笔记功能
+    function exportEntries(format) {
+        const topicId = {{ topic.id }};
+        let content = '';
+        let filename = '{{ topic.text|escapejs }}_' + new Date().toISOString().slice(0,10);
+        let mimeType = 'text/plain';
+        let extension = format;
+        
+        // 获取所有笔记内容
+        const entries = document.querySelectorAll('.card');
+        
+        if (format === 'txt') {
+            entries.forEach((entry, index) => {
+                const date = entry.querySelector('.entry-date')?.textContent || '';
+                const textContent = entry.querySelector('.markdown-content')?.innerText || '';
+                if (textContent.trim()) {
+                    content += `=== 笔记 ${index + 1} (${date}) ===\n\n${textContent}\n\n${'='.repeat(30)}\n\n`;
+                }
+            });
+            filename += '.txt';
+        } else if (format === 'md') {
+            content += `# {{ topic.text|escapejs }}\n\n`;
+            content += `> 导出日期: ${new Date().toLocaleDateString('zh-CN')}\n\n---\n\n`;
+            entries.forEach((entry, index) => {
+                const date = entry.querySelector('.entry-date')?.textContent || '';
+                const textContent = entry.querySelector('.markdown-content')?.innerText || '';
+                if (textContent.trim()) {
+                    content += `## 笔记 ${index + 1}\n\n`;
+                    content += `*${date}*\n\n`;
+                    content += textContent + '\n\n---\n\n';
+                }
+            });
+            filename += '.md';
+            mimeType = 'text/markdown';
+        } else if (format === 'pdf') {
+            // PDF 导出 - 使用浏览器打印功能
+            const printContent = `
+                <html>
+                <head>
+                    <title>{{ topic.text|escapejs }}</title>
+                    <style>
+                        body { font-family: 'Noto Sans SC', sans-serif; padding: 40px; }
+                        h1 { color: #333; }
+                        .entry { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+                        .date { color: #666; font-size: 0.9em; }
+                        .content { line-height: 1.8; }
+                    </style>
+                </head>
+                <body>
+                    <h1>{{ topic.text|escapejs }}</h1>
+                    <p>导出日期: ${new Date().toLocaleDateString('zh-CN')}</p>
+                    <hr>
+            `;
+            entries.forEach((entry, index) => {
+                const date = entry.querySelector('.entry-date')?.textContent || '';
+                const textContent = entry.querySelector('.markdown-content')?.innerText || '';
+                if (textContent.trim()) {
+                    printContent += `<div class="entry"><h3>笔记 ${index + 1}</h3><p class="date">${date}</p><div class="content">${textContent.replace(/\n/g, '<br>')}</div></div>`;
+                }
+            });
+            printContent += '</body></html>';
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+            return;
+        }
+        
+        // 下载文件
+        const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+})();
+</script>
 {% endblock %}

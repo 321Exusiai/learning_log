@@ -5,22 +5,25 @@ from . import views
 app_name = 'learning_logs'
 
 urlpatterns = [
-    # 主页
     path('', views.index, name='index'),
-    # 主题列表
+    path('search/', views.search, name='search'),
     path('topics/', views.topics, name='topics'),
-    # 主题详情
     path('topics/<int:topic_id>/', views.topic, name='topic'),
-    # 添加新主题
     path('new_topic/', views.new_topic, name='new_topic'),
-    # 添加新笔记
     path('new_entry/<int:topic_id>/', views.new_entry, name='new_entry'),
-    # 编辑笔记
     path('edit_entry/<int:topic_id>/<int:entry_id>/', views.edit_entry, name='edit_entry'),
-    # 编辑主题
     path('edit_topic/<int:topic_id>/', views.edit_topic, name='edit_topic'),
-    # 删除主题
     path('delete_topic/<int:topic_id>/', views.delete_topic, name='delete_topic'),
-    # 删除单条笔记
     path('delete_entry/<int:topic_id>/<int:entry_id>/', views.delete_entry, name='delete_entry'),
+    path('delete_image/<int:image_id>/', views.delete_entry_image, name='delete_entry_image'),
+    path('delete_attachment/<int:attach_id>/', views.delete_entry_attachment, name='delete_entry_attachment'),
+    path('trash/', views.trash, name='trash'),
+    path('restore_topic/<int:topic_id>/', views.restore_topic, name='restore_topic'),
+    path('restore_entry/<int:entry_id>/', views.restore_entry, name='restore_entry'),
+    path('permanent_delete_topic/<int:topic_id>/', views.permanent_delete_topic, name='permanent_delete_topic'),
+    path('permanent_delete_entry/<int:entry_id>/', views.permanent_delete_entry, name='permanent_delete_entry'),
+    path('revisions/<int:topic_id>/<int:entry_id>/', views.entry_revisions, name='entry_revisions'),
+    path('share/<int:topic_id>/', views.share_topic, name='share_topic'),
+    path('reorder_topics/', views.reorder_topics, name='reorder_topics'),
+    path('toggle_pin/<int:topic_id>/', views.toggle_pin_topic, name='toggle_pin_topic'),
 ]

@@ -1,0 +1,150 @@
+{% extends "learning_logs/base.html" %}
+
+{% block title %}添加照片 - Learning Log{% endblock %}
+
+{% block content %}
+<style>
+    .add-album-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    
+    .add-album-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .add-album-header h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid rgba(226, 232, 240, 0.8);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: var(--transition-smooth);
+        background: rgba(255, 255, 255, 0.7);
+    }
+    
+    .image-preview {
+        margin-top: 1rem;
+        text-align: center;
+    }
+    
+    .image-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn-upload {
+        flex: 1;
+        background: var(--accent);
+        color: white;
+        padding: 1rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+    
+    .btn-upload:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+    
+    .btn-cancel {
+        background: transparent;
+        color: var(--text-muted);
+        padding: 1rem 2rem;
+        border: 2px solid var(--text-muted);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        text-decoration: none;
+        text-align: center;
+        transition: var(--transition-smooth);
+    }
+    
+    .btn-cancel:hover {
+        border-color: var(--text-main);
+        color: var(--text-main);
+    }
+</style>
+
+<div class="add-album-container">
+    <div class="add-album-header">
+        <h1>📷 添加照片</h1>
+        <p style="color: var(--text-muted);">上传一张照片到你的相册</p>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+            {{ form.image }}
+            <div class="image-preview" id="imagePreview" style="display: none;">
+                <img id="previewImg" src="" alt="预览">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.caption.id_for_label }}">{{ form.caption.label }}</label>
+            {{ form.caption }}
+        </div>
+        
+        <div class="btn-group">
+            <a href="{% url 'accounts:profile' %}" class="btn-cancel">取消</a>
+            <button type="submit" class="btn-upload">上传照片</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.querySelector('input[type="file"]');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

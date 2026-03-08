@@ -1,0 +1,167 @@
+{% extends "learning_logs/base.html" %}
+
+{% block title %}回收站 - Learning Log{% endblock %}
+
+{% block content %}
+<style>
+    .trash-section {
+        margin-bottom: 3rem;
+    }
+    
+    .trash-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .trash-item {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: var(--transition-smooth);
+    }
+    
+    .trash-item:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+    
+    .trash-item-info h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-main);
+    }
+    
+    .trash-item-info p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    
+    .trash-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-restore {
+        background: var(--accent);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: var(--transition-smooth);
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-restore:hover {
+        background: #059669;
+        transform: scale(1.05);
+    }
+    
+    .btn-permanent-delete {
+        background: var(--danger);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: var(--transition-smooth);
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-permanent-delete:hover {
+        background: #dc2626;
+        transform: scale(1.05);
+    }
+    
+    .empty-trash {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+    
+    .empty-trash svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+</style>
+
+<div style="margin-bottom: 2rem;">
+    <a href="{% url 'learning_logs:topics' %}" class="small-link">← 返回主题列表</a>
+    <h2 style="font-size: 2rem; margin-top: 1rem;">🗑️ 回收站</h2>
+    <p style="color: var(--text-muted);">已删除的内容将在 30 天后自动清除</p>
+</div>
+
+<!-- 已删除的主题 -->
+<div class="trash-section">
+    <h3 class="trash-title">📁 已删除的主题</h3>
+    {% if deleted_topics %}
+        {% for topic in deleted_topics %}
+        <div class="trash-item">
+            <div class="trash-item-info">
+                <h4>{{ topic.text }}</h4>
+                <p>删除于 {{ topic.deleted_at|date:"Y年m月d日 H:i" }}</p>
+            </div>
+            <div class="trash-actions">
+                <a href="{% url 'learning_logs:restore_topic' topic.id %}" class="btn-restore">恢复</a>
+                <form action="{% url 'learning_logs:permanent_delete_topic' topic.id %}" method="post" style="display: inline;" onsubmit="return confirm('确定要永久删除吗？此操作不可恢复！');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-permanent-delete">永久删除</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-trash">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12z"/>
+            </svg>
+            <p>回收站中没有已删除的主题</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- 已删除的笔记 -->
+<div class="trash-section">
+    <h3 class="trash-title">📝 已删除的笔记</h3>
+    {% if deleted_entries %}
+        {% for entry in deleted_entries %}
+        <div class="trash-item">
+            <div class="trash-item-info">
+                <h4>{{ entry.text|truncatechars:50 }}</h4>
+                <p>所属主题: {{ entry.topic.text }} | 删除于 {{ entry.deleted_at|date:"Y年m月d日 H:i" }}</p>
+            </div>
+            <div class="trash-actions">
+                <a href="{% url 'learning_logs:restore_entry' entry.id %}" class="btn-restore">恢复</a>
+                <form action="{% url 'learning_logs:permanent_delete_entry' entry.id %}" method="post" style="display: inline;" onsubmit="return confirm('确定要永久删除吗？此操作不可恢复！');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-permanent-delete">永久删除</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-trash">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12z"/>
+            </svg>
+            <p>回收站中没有已删除的笔记</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

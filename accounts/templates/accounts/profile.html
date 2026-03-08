@@ -1,0 +1,298 @@
+{% extends "learning_logs/base.html" %}
+
+{% block title %}个人资料 - Learning Log{% endblock %}
+
+{% block content %}
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--glass-border);
+    }
+    
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--primary);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .profile-info h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2rem;
+        color: var(--text-main);
+    }
+    
+    .profile-info .bio {
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        font-style: italic;
+    }
+    
+    .profile-stats {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-item .number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    
+    .stat-item .label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    
+    .profile-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .detail-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        border: 1px solid var(--glass-border);
+    }
+    
+    .detail-card h3 {
+        margin: 0 0 1rem 0;
+        color: var(--primary);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        color: var(--text-muted);
+    }
+    
+    .detail-value {
+        color: var(--text-main);
+        font-weight: 500;
+    }
+    
+    .album-section h2 {
+        margin-bottom: 1.5rem;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .album-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .album-item {
+        position: relative;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        aspect-ratio: 1;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+    
+    .album-item:hover {
+        transform: scale(1.05);
+    }
+    
+    .album-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .album-item .overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.7));
+        padding: 1rem;
+        color: white;
+        font-size: 0.85rem;
+        opacity: 0;
+        transition: var(--transition-smooth);
+    }
+    
+    .album-item:hover .overlay {
+        opacity: 1;
+    }
+    
+    .btn-edit {
+        background: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: var(--transition-smooth);
+    }
+    
+    .btn-edit:hover {
+        background: var(--primary-hover);
+        transform: scale(1.05);
+    }
+    
+    .empty-album {
+        text-align: center;
+        padding: 3rem;
+        background: var(--card-bg);
+        border-radius: var(--radius-md);
+        color: var(--text-muted);
+    }
+</style>
+
+<div class="profile-container">
+    <!-- 头部信息 -->
+    <div class="profile-header">
+        {% if profile.avatar %}
+        <img src="{{ profile.avatar.url }}" alt="头像" class="profile-avatar">
+        {% else %}
+        <div class="profile-avatar" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem; font-weight: bold;">
+            {{ user.username|slice:":1"|upper }}
+        </div>
+        {% endif %}
+        
+        <div class="profile-info">
+            <h1>{{ user.username }}</h1>
+            {% if profile.bio %}
+            <p class="bio">"{{ profile.bio }}"</p>
+            {% endif %}
+            
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="number">{{ user.topic_set.count }}</div>
+                    <div class="label">主题</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">0</div>
+                    <div class="label">笔记</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">{{ profile.album_images.count }}</div>
+                    <div class="label">相册</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                <a href="{% url 'accounts:edit_profile' %}" class="btn-edit">✏️ 编辑资料</a>
+                <a href="{% url 'accounts:add_album_image' %}" class="btn-edit" style="background: var(--accent);">📷 添加照片</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 详细信息 -->
+    <div class="profile-details">
+        <div class="detail-card">
+            <h3>👤 基本信息</h3>
+            <div class="detail-item">
+                <span class="detail-label">用户名</span>
+                <span class="detail-value">{{ user.username }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">邮箱</span>
+                <span class="detail-value">{{ user.email|default:"未设置" }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">注册时间</span>
+                <span class="detail-value">{{ user.date_joined|date:"Y年m月d日" }}</span>
+            </div>
+        </div>
+        
+        <div class="detail-card">
+            <h3>📋 个人资料</h3>
+            <div class="detail-item">
+                <span class="detail-label">性别</span>
+                <span class="detail-value">{{ profile.get_gender_display|default:"未设置" }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">年龄</span>
+                <span class="detail-value">{{ profile.age|default:"未设置" }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">所在地</span>
+                <span class="detail-value">{{ profile.location|default:"未设置" }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">个人网站</span>
+                <span class="detail-value">
+                    {% if profile.website %}
+                    <a href="{{ profile.website }}" target="_blank" style="color: var(--primary);">访问</a>
+                    {% else %}
+                    未设置
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 相册 -->
+    <div class="album-section">
+        <h2>
+            <span>📷 我的相册</span>
+        </h2>
+        
+        {% if album_images %}
+        <div class="album-grid">
+            {% for image in album_images %}
+            <div class="album-item">
+                <img src="{{ image.image.url }}" alt="{{ image.caption|default:'相册图片' }}">
+                <div class="overlay">
+                    {{ image.caption|default:"" }}
+                    <form action="{% url 'accounts:delete_album_image' image.id %}" method="post" style="display: inline;" onsubmit="return confirm('确定删除这张图片吗？');">
+                        {% csrf_token %}
+                        <button type="submit" style="background: var(--danger); color: white; border: none; padding: 0.2rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.75rem; margin-left: 0.5rem;">删除</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-album">
+            <p>还没有上传照片</p>
+            <a href="{% url 'accounts:add_album_image' %}" class="btn-edit" style="margin-top: 1rem; display: inline-block;">上传第一张照片</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

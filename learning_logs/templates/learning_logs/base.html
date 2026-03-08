@@ -14,21 +14,140 @@
 
     <style>
         :root {
+            /* 主色调 - iOS 风格 */
             --primary: #6366f1;
             --primary-hover: #4f46e5;
             --secondary: #ec4899;
+            --accent: #10b981;
+            --danger: #ef4444;
+            
+            /* 背景 - 液体玻璃效果 */
             --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            --card-bg: rgba(255, 255, 255, 0.82);
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: rgba(0, 0, 0, 0.05);
+            
+            /* 文字 */
             --text-main: #1e293b;
             --text-muted: #64748b;
-            --nav-bg: rgba(255, 255, 255, 0.75);
-            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --radius-md: 12px;
-            --radius-lg: 20px;
+            --text-light: #94a3b8;
+            
+            /* 动画 - 丝滑效果 */
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --transition-glass: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            
+            /* 阴影 - 分层效果 */
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            
+            /* 圆角 - iOS 风格 */
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --radius-full: 9999px;
+            
+            /* 黄金分割比例 */
+            --golden-ratio: 1.618;
         }
+
+        /* 深色模式 */
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --nav-bg: rgba(15, 23, 42, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: rgba(0, 0, 0, 0.3);
+            
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-light: #64748b;
+            
+            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        /* 深色模式下的选中样式 */
+        [data-theme="dark"] ::selection {
+            background: rgba(99, 102, 241, 0.4);
+            color: #ffffff;
+        }
+
+        /* 深色模式下的输入框 */
+        [data-theme="dark"] form input,
+        [data-theme="dark"] form textarea {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        [data-theme="dark"] form input:focus,
+        [data-theme="dark"] form textarea:focus {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: var(--primary);
+        }
+
+        /* 深色模式下的卡片 */
+        [data-theme="dark"] .card {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* 深色模式下的表格 */
+        [data-theme="dark"] .markdown-content th,
+        [data-theme="dark"] .markdown-content td {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .markdown-content th {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        [data-theme="dark"] .markdown-content pre {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .markdown-content blockquote {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-main);
+            transition: var(--transition-smooth);
+        }
+
+        .theme-toggle .sun-icon { display: none; }
+        .theme-toggle .moon-icon { display: block; }
+
+        [data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+        [data-theme="dark"] .theme-toggle .moon-icon { display: none; }
 
         /* Basic Styles */
         * {
@@ -44,6 +163,8 @@
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
+            background-attachment: fixed;
+            background-size: 100% 100%;
         }
 
         h1,
@@ -53,7 +174,7 @@
         .logo {
             font-family: 'Outfit', sans-serif;
             font-weight: 700;
-            color: #0f172a;
+            color: var(--text-main);
         }
 
         /* Navigation */
@@ -62,24 +183,47 @@
             top: 0;
             z-index: 1000;
             background: var(--nav-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 1rem 4rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1.2rem 4rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-glass);
+            transition: var(--transition-glass);
+        }
+        
+        .navbar:hover {
+            background: var(--nav-bg);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2);
+        }
+        
+        [data-theme="dark"] .navbar:hover {
+            background: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
         }
 
         .logo {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-decoration: none;
             letter-spacing: -0.04em;
+            font-weight: 800;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .nav-links {
@@ -95,50 +239,85 @@
             font-size: 0.95rem;
             transition: var(--transition-smooth);
             position: relative;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
         }
 
         .nav-link:hover {
             color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
         }
 
         .nav-link.active {
             color: var(--primary);
+            background: rgba(99, 102, 241, 0.15);
+            font-weight: 700;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition-smooth);
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
         }
 
         .nav-btn {
-            padding: 0.7rem 1.4rem;
-            border-radius: var(--radius-md);
+            padding: 0.8rem 1.6rem;
+            border-radius: var(--radius-full);
             font-weight: 600;
             text-decoration: none;
             font-size: 0.95rem;
-            transition: var(--transition-smooth);
+            transition: var(--transition-bounce);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-primary {
             background: var(--primary);
             color: white;
             border: none;
+            box-shadow: var(--shadow-md);
         }
 
         .btn-primary:hover {
             background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0) scale(0.98);
         }
 
         .btn-outline {
             border: 2px solid var(--primary);
             color: var(--primary);
-            background: transparent;
+            background: rgba(99, 102, 241, 0.05);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-outline:hover {
-            background: rgba(99, 102, 241, 0.08);
-            transform: translateY(-2px);
+            background: rgba(99, 102, 241, 0.15);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-outline:active {
+            transform: translateY(0) scale(0.98);
         }
 
         .btn-danger-text {
@@ -165,29 +344,49 @@
             max-width: 1000px;
             margin: 4rem auto;
             padding: 0 2rem;
-            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideIn 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(50px) scale(0.95);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
 
         /* Card Component */
         .card {
             background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
-            padding: 3rem;
-            box-shadow: var(--shadow-lg);
+            padding: 3.5rem;
+            box-shadow: var(--shadow-glass);
+            transition: var(--transition-glass);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+        }
+        
+        .card:hover {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 15px 45px 0 rgba(31, 38, 135, 0.25);
+            transform: translateY(-5px);
         }
 
         /* Typography spacing */
@@ -207,21 +406,31 @@
         form input,
         form textarea {
             width: 100%;
-            padding: 0.9rem 1.2rem;
-            border: 2px solid #e2e8f0;
+            padding: 1rem 1.4rem;
+            border: 2px solid rgba(226, 232, 240, 0.8);
             border-radius: var(--radius-md);
             margin-top: 0.5rem;
             font-family: inherit;
             font-size: 1rem;
             transition: var(--transition-smooth);
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
-        form input:focus {
+        form input:focus,
+        form textarea:focus {
             outline: none;
             border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+
+        form input:hover,
+        form textarea:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(255, 255, 255, 0.8);
         }
 
         .form-group {
@@ -242,16 +451,60 @@
             color: var(--primary);
             text-decoration: none;
             font-weight: 600;
+            transition: var(--transition-smooth);
+            padding: 0.3rem 0.6rem;
+            border-radius: var(--radius-sm);
+            position: relative;
         }
 
         .small-link:hover {
-            text-decoration: underline;
+            text-decoration: none;
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-1px);
+            color: var(--primary-hover);
+        }
+
+        .small-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: var(--transition-smooth);
+            transform-origin: right;
+        }
+
+        .small-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
         }
 
         /* Mobile specific */
         @media (max-width: 768px) {
             .navbar {
-                padding: 1rem 2rem;
+                padding: 1.2rem 1.5rem;
+                gap: 1rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-link {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .nav-btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.85rem;
             }
 
             h1 {
@@ -260,13 +513,101 @@
 
             .container {
                 margin: 2rem auto;
+                padding: 0 1.5rem;
             }
 
             .card {
-                padding: 2rem;
+                padding: 2.5rem;
+                border-radius: var(--radius-md);
             }
         }
+
+        /* 滚动条样式 - iOS 风格 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(241, 245, 249, 0.8);
+            border-radius: var(--radius-full);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.5);
+            border-radius: var(--radius-full);
+            transition: var(--transition-smooth);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+
+        /* 选择文本样式 */
+        ::selection {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--text-main);
+        }
+
+        /* 焦点样式 */
+        *:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        
+        /* 搜索结果样式 */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-glass);
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        .search-result-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .search-result-title {
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+        .search-result-preview {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .search-highlight {
+            background: rgba(99, 102, 241, 0.3);
+            color: var(--primary);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
     </style>
+    <!-- KaTeX for LaTeX math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <!-- SortableJS for drag and drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 
 <body>
@@ -274,12 +615,32 @@
         <a href="{% url 'learning_logs:index' %}" class="logo">LearningLog.</a>
 
         <div class="nav-links">
+            <!-- 搜索框 -->
+            <div class="search-box" style="position: relative; display: flex; align-items: center;">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 10px; width: 18px; height: 18px; color: var(--text-muted);">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input type="text" id="globalSearch" placeholder="搜索笔记..." 
+                    style="padding: 0.5rem 1rem 0.5rem 2.5rem; border: 1px solid var(--glass-border); border-radius: var(--radius-full); 
+                           background: var(--card-bg); color: var(--text-main); font-size: 0.9rem; width: 200px; 
+                           transition: all 0.3s ease;"
+                    onfocus="this.style.width='300px'; this.style.boxShadow='0 0 0 3px rgba(99,102,241,0.1)';"
+                    onblur="this.style.width='200px'; this.style.boxShadow='none';">
+                <div id="searchResults" class="search-results" style="display: none;"></div>
+            </div>
+            
+            <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+            </button>
             {% if user.is_authenticated %}
             <a href="{% url 'learning_logs:topics' %}" class="nav-link">My Topics</a>
-            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
-                User: <strong style="color: var(--text-main);">{{ user.username }}</strong>
-            </span>
-            <!-- ✅ 修复：把注销链接改成POST表单，样式完全保留 -->
+            <a href="{% url 'accounts:profile' %}" class="nav-link">Profile</a>
             <form action="{% url 'accounts:logout' %}" method="post" style="display: inline; margin: 0; padding: 0;">
                 {% csrf_token %}
                 <button type="submit" class="btn-danger-text">Logout</button>
@@ -292,10 +653,163 @@
     </nav>
 
     <div class="container">
+        {% if messages %}
+        <div style="margin-bottom: 1.5rem;">
+            {% for message in messages %}
+            <div style="padding: 1rem 1.5rem; border-radius: var(--radius-md); margin-bottom: 0.5rem; {% if message.tags == 'success' %}background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent); color: var(--accent);{% elif message.tags == 'error' %}background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger);{% elif message.tags == 'warning' %}background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; color: #f59e0b;{% else %}background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); color: var(--primary);{% endif %} font-weight: 500; animation: slideIn 0.5s ease;">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
         <div class="card">
             {% block content %}{% endblock %}
         </div>
     </div>
+
+    <script>
+    (function() {
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+        
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (prefersDark.matches) {
+                setTheme('dark');
+            }
+        }
+        
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+        
+        prefersDark.addEventListener('change', function(e) {
+            if (!localStorage.getItem('theme')) {
+                setTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+        
+        initTheme();
+        
+        // KaTeX 初始化 - 渲染 LaTeX 数学公式
+        function initKaTeX() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\[', right: '\\]', display: true},
+                        {left: '\\(', right: '\\)', display: false}
+                    ],
+                    throwOnError: false,
+                    errorColor: '#ef4444'
+                });
+            }
+        }
+        
+        // 页面加载后初始化 KaTeX
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initKaTeX);
+        } else {
+            initKaTeX();
+        }
+        
+        // 全局搜索功能
+        const searchInput = document.getElementById('globalSearch');
+        const searchResults = document.getElementById('searchResults');
+        let searchTimeout;
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+                
+                if (query.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => performSearch(query), 300);
+            });
+            
+            searchInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    searchResults.style.display = 'none';
+                }, 200);
+            });
+            
+            searchInput.addEventListener('focus', function() {
+                if (searchResults.innerHTML.trim()) {
+                    searchResults.style.display = 'block';
+                }
+            });
+        }
+        
+        function performSearch(query) {
+            fetch(`/search/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displaySearchResults(data, query);
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                });
+        }
+        
+        function displaySearchResults(results, query) {
+            if (!results.topics && !results.entries) {
+                searchResults.innerHTML = '<div class="search-result-item"><p>未找到相关内容</p></div>';
+                searchResults.style.display = 'block';
+                return;
+            }
+            
+            let html = '';
+            
+            // 显示主题结果
+            if (results.topics && results.topics.length > 0) {
+                html += '<div style="padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">主题</div>';
+                results.topics.forEach(topic => {
+                    const title = highlightMatch(topic.text, query);
+                    html += `<a href="/topics/${topic.id}/" class="search-result-item">
+                        <div class="search-result-title">${title}</div>
+                    </a>`;
+                });
+            }
+            
+            // 显示笔记结果
+            if (results.entries && results.entries.length > 0) {
+                html += '<div style="padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">笔记</div>';
+                results.entries.forEach(entry => {
+                    const title = highlightMatch(entry.topic_text, query);
+                    const preview = highlightMatch(entry.text.substring(0, 100), query);
+                    html += `<a href="/topics/${entry.topic_id}/" class="search-result-item">
+                        <div class="search-result-title">${title}</div>
+                        <div class="search-result-preview">${preview}...</div>
+                    </a>`;
+                });
+            }
+            
+            searchResults.innerHTML = html;
+            searchResults.style.display = 'block';
+        }
+        
+        function highlightMatch(text, query) {
+            if (!text) return '';
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+    })();
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>

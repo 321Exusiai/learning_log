@@ -1,9 +1,9 @@
 {% extends "learning_logs/base.html" %}
 
 {% block title %}
-{% with topic_text=topic.text %}
-Edit Entry - {{ topic_text }}
-{% endwith %}
+    {% with topic_text=topic.text %}
+    Edit Entry - {{ topic_text }}
+    {% endwith %}
 {% endblock %}
 
 {% block content %}
@@ -15,19 +15,22 @@ Edit Entry - {{ topic_text }}
         border-radius: var(--radius-md);
         width: 100%;
         box-sizing: border-box;
+        transition: border 0.3s ease;
     }
-
+    .multi-file-input {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
-
     .form-label {
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 600;
         color: var(--text-main);
+        font-size: 1.05rem;
     }
-
     textarea {
         min-height: 200px;
         width: 100%;
@@ -36,35 +39,100 @@ Edit Entry - {{ topic_text }}
         border-radius: var(--radius-md);
         font-size: 1rem;
         resize: vertical;
+        transition: all 0.3s ease;
     }
-
-    textarea:focus,
-    .file-input:focus {
+    textarea:focus, .file-input:focus {
         outline: none;
         border-color: var(--primary);
         box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
     }
-
-    .file-preview {
+    .error-message {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .hint-text {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .upload-tip {
+        color: var(--primary);
+        font-size: 0.8rem;
+        margin-top: 0.3rem;
+    }
+    /* 多文件预览样式 */
+    .file-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
         margin: 1rem 0;
-        padding: 1rem;
+    }
+    .image-preview-card {
+        width: 120px;
+        height: 120px;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        position: relative;
+    }
+    .image-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .attach-preview-card {
+        padding: 0.8rem 1rem;
         border: 1px solid #e2e8f0;
         border-radius: var(--radius-md);
         background: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        white-space: nowrap;
     }
-
-    .image-preview {
-        max-width: 300px;
-        max-height: 300px;
-        border-radius: var(--radius-md);
-        margin: 0.5rem 0;
+    /* 文件删除按钮 */
+    .file-delete-btn {
+        position: absolute;
+        top: 0.3rem;
+        right: 0.3rem;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+    .file-delete-btn:hover {
+        opacity: 1;
+    }
+    .attach-delete-btn {
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+        cursor: pointer;
     }
 </style>
 
 <div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">
-    <a href="{% url 'learning_logs:topic' topic.id %}" class="small-link" style="margin-bottom: 1rem; display: block;">←
-        Back to Topic</a>
-
+    <a href="{% url 'learning_logs:topic' topic.id %}" class="small-link" style="margin-bottom: 1rem; display: block;">← Back to Topic</a>
+    
     <h2 style="font-size: 2rem; margin-bottom: 1.5rem;">Edit Entry</h2>
     {% with topic_text=topic.text %}
     <p style="color: var(--text-muted); margin-bottom: 2rem;">Topic: <strong>{{ topic_text }}</strong></p>
@@ -72,51 +140,89 @@ Edit Entry - {{ topic_text }}
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-
+        
+        <!-- 笔记内容编辑 -->
         <div class="form-group">
             <label class="form-label">Entry Content</label>
-            {{ form.text }}
+            {{ entry_form.text }}
+            {% if entry_form.text.errors %}
+                {% for error in entry_form.text.errors %}
+                <p class="error-message">⚠️ {{ error }}</p>
+                {% endfor %}
+            {% endif %}
         </div>
 
+        <!-- 多图片：预览已有图片 + 新增图片 -->
         <div class="form-group">
-            <label class="form-label">{{ form.image.label }}</label>
-            {{ form.image }}
+            <label class="form-label">{{ image_form.image.label }}</label>
+            {{ image_form.image }}
+            <p class="hint-text">📸 支持格式：JPG/PNG/GIF | 单张最大：5MB（自动压缩）</p>
+            <p class="upload-tip">💡 按住Ctrl/Shift可选择多张图片</p>
+            {% if image_form.image.errors %}
+                {% for error in image_form.image.errors %}
+                <p class="error-message">⚠️ {{ error }}</p>
+                {% endfor %}
+            {% endif %}
 
-            <!-- 显示已上传的图片 -->
-            {% if entry.image %}
-            <div class="file-preview">
-                <p style="font-size: 0.9rem; margin: 0 0 0.5rem 0;">Current image:</p>
-                <img src="{{ entry.image.url }}" alt="Entry image" class="image-preview"
-                    onError="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'; this.alt='Image not found'">
-                <p style="font-size: 0.85rem; color: #ef4444; margin-top: 0.5rem;">
-                    Check the "Clear" box above to delete this image
-                </p>
+            <!-- 预览已有图片 -->
+            {% if entry_images %}
+            <div style="margin-top: 1.5rem;">
+                <p style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">已上传图片（点击❌删除）：</p>
+                <div class="file-preview-container">
+                    {% for img in entry_images %}
+                    <div class="image-preview-card">
+                        <img src="{{ img.image.url }}" alt="Entry image" class="image-preview"
+                             onError="this.src='https://via.placeholder.com/120?text=Image+Lost';">
+                        <!-- 图片删除按钮 -->
+                        <form action="{% url 'learning_logs:delete_entry_image' img.id %}" method="post" onsubmit="return confirm('确定删除这张图片吗？');">
+                            {% csrf_token %}
+                            <button type="submit" class="file-delete-btn">×</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
         </div>
 
+        <!-- 多附件：预览已有附件 + 新增附件 -->
         <div class="form-group">
-            <label class="form-label">{{ form.attachment.label }}</label>
-            {{ form.attachment }}
+            <label class="form-label">{{ attachment_form.attachment.label }}</label>
+            {{ attachment_form.attachment }}
+            <p class="hint-text">📎 支持格式：ZIP/RAR/JSON/图片/TXT | 单个最大：10MB</p>
+            <p class="upload-tip">💡 按住Ctrl/Shift可选择多个附件</p>
+            {% if attachment_form.attachment.errors %}
+                {% for error in attachment_form.attachment.errors %}
+                <p class="error-message">⚠️ {{ error }}</p>
+                {% endfor %}
+            {% endif %}
 
-            <!-- 显示已上传的附件 -->
-            {% if entry.attachment %}
-            <div class="file-preview">
-                <p style="font-size: 0.9rem; margin: 0;">Current attachment:</p>
-                <a href="{{ entry.attachment.url }}" target="_blank"
-                    style="color: var(--primary); text-decoration: underline;">
-                    {% with attach_name=entry.get_attachment_name %}
-                    {{ attach_name }}
-                    {% endwith %}
-                </a>
-                <p style="font-size: 0.85rem; color: #ef4444; margin-top: 0.5rem;">
-                    Check the "Clear" box above to delete this attachment
-                </p>
+            <!-- 预览已有附件 -->
+            {% if entry_attachments %}
+            <div style="margin-top: 1.5rem;">
+                <p style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">已上传附件（点击❌删除）：</p>
+                <div class="file-preview-container">
+                    {% for attach in entry_attachments %}
+                    <div class="attach-preview-card">
+                        <span>📎</span>
+                        <a href="{{ attach.attachment.url }}" target="_blank" style="color: var(--primary);">
+                            {% with attach_name=attach.get_attachment_name %}
+                            {{ attach_name|truncatechars:15 }}
+                            {% endwith %}
+                        </a>
+                        <!-- 附件删除按钮 -->
+                        <form action="{% url 'learning_logs:delete_entry_attachment' attach.id %}" method="post" onsubmit="return confirm('确定删除这个附件吗？');">
+                            {% csrf_token %}
+                            <button type="submit" class="attach-delete-btn">×</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
         </div>
 
-        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
             <button type="submit" class="nav-btn btn-primary">Save Changes</button>
             <a href="{% url 'learning_logs:topic' topic.id %}" class="nav-btn btn-outline">Cancel</a>
         </div>
