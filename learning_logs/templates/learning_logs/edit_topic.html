@@ -3,21 +3,108 @@
 {% block title %}编辑主题 - Learning Log{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 2rem;">
-    <a href="{% url 'learning_logs:topics' %}" class="small-link" style="margin-bottom: 1rem; display: block;">← Back to
-        All Topics</a>
-    <h2 style="font-size: 2rem; margin-bottom: 1.5rem;">编辑主题：{{ topic.text }}</h2>
+<div class="form-page-container">
+    <a href="{% url 'learning_logs:topics' %}" class="small-link form-back-link">← Back to All Topics</a>
+    
+    <div class="form-header">
+        <h2 class="form-title">编辑主题：{{ topic.text }}</h2>
+    </div>
+
+    <form method="post" class="standard-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label">主题名称</label>
+            {{ form.text }}
+        </div>
+        <div class="form-group">
+            <label class="form-label">可见性</label>
+            {{ form.visibility }}
+        </div>
+        <div class="form-group">
+            <label class="form-label">封面样式</label>
+            {{ form.cover_style }}
+        </div>
+        <div class="form-group">
+            <label class="form-label">封面图片</label>
+            {{ form.cover_image }}
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="nav-btn btn-primary btn-large">保存修改</button>
+            <a href="{% url 'learning_logs:topics' %}" class="nav-btn btn-outline btn-large">取消</a>
+        </div>
+    </form>
 </div>
 
-<form method="post">
-    {% csrf_token %}
-    <div class="form-group">
-        <label class="form-label">主题名称</label>
-        {{ form.text }}
-    </div>
-    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-        <button type="submit" class="nav-btn btn-primary">保存修改</button>
-        <a href="{% url 'learning_logs:topics' %}" class="nav-btn btn-outline">取消</a>
-    </div>
-</form>
+<style>
+    .form-page-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .form-back-link {
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .form-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .form-title {
+        margin-bottom: 1rem;
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    .standard-form {
+        width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-large {
+        padding: 0.85rem 2.5rem;
+        flex-shrink: 0;
+    }
+
+    input[type="text"], select, input[type="file"], textarea {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        box-sizing: border-box;
+        background: white;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+    }
+
+    @media (max-width: 600px) {
+        .nav-btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
 {% endblock %}

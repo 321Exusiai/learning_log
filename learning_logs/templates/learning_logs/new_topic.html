@@ -3,59 +3,127 @@
 {% block title %}New Topic - Learning Log{% endblock %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto; padding: 0 1rem;">
+<div class="form-page-container">
     <!-- 返回按钮 -->
-    <a href="{% url 'learning_logs:topics' %}" class="small-link" style="margin-bottom: 1rem; display: block;">← Back to
-        Topics</a>
+    <a href="{% url 'learning_logs:topics' %}" class="small-link form-back-link">← Back to Topics</a>
 
     <!-- 标题区域 -->
-    <h2 style="margin-bottom: 1rem; font-size: 2rem; line-height: 1.2;">Define a New Subject</h2>
-    <p style="margin-bottom: 2.5rem; font-size: 1.1rem; color: var(--text-main);">
-        Give your learning a name to start organized logging.
-    </p>
+    <div class="form-header">
+        <h2 class="form-title">Define a New Subject</h2>
+        <p class="form-subtitle">Give your learning a name to start organized logging.</p>
+    </div>
 
     <!-- 表单区域 -->
-    <form method="post" action="{% url 'learning_logs:new_topic' %}" style="width: 100%;">
+    <form method="post" action="{% url 'learning_logs:new_topic' %}" class="standard-form">
         {% csrf_token %}
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-            <label class="form-label" for="{{ form.text.id_for_label }}"
-                style="display: block; margin-bottom: 0.75rem; font-weight: 600; font-size: 1rem;">
+        <div class="form-group">
+            <label class="form-label" for="{{ form.text.id_for_label }}">
                 Subject Title
             </label>
-            <!-- 输入框优化 -->
             {{ form.text }}
             {% if form.text.errors %}
-            {% for error in form.text.errors %}
-            <p style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem;">{{ error }}</p>
-            {% endfor %}
+                {% for error in form.text.errors %}<p class="error-msg">{{ error }}</p>{% endfor %}
             {% endif %}
         </div>
 
+        <div class="form-group">
+            <label class="form-label">Visibility</label>
+            {{ form.visibility }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Cover Style</label>
+            {{ form.cover_style }}
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Cover Image</label>
+            {{ form.cover_image }}
+        </div>
+
         <!-- 操作按钮 -->
-        <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
-            <button type="submit" class="nav-btn btn-primary" style="padding: 0.85rem 2.5rem; flex-shrink: 0;">Create
-                Subject</button>
-            <a href="{% url 'learning_logs:topics' %}" class="nav-btn btn-outline"
-                style="padding: 0.85rem 2.5rem; flex-shrink: 0;">Cancel</a>
+        <div class="form-actions">
+            <button type="submit" class="nav-btn btn-primary btn-large">Create Subject</button>
+            <a href="{% url 'learning_logs:topics' %}" class="nav-btn btn-outline btn-large">Cancel</a>
         </div>
     </form>
 </div>
 
 <!-- 样式优化 -->
 <style>
-    input[type="text"] {
+    .form-page-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .form-back-link {
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .form-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .form-title {
+        margin-bottom: 1rem;
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    .form-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-main);
+    }
+
+    .standard-form {
+        width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-large {
+        padding: 0.85rem 2.5rem;
+        flex-shrink: 0;
+    }
+
+    input[type="text"], select, input[type="file"], textarea {
         width: 100%;
         padding: 0.85rem 1rem;
         border: 1px solid #e2e8f0;
         border-radius: var(--radius-md);
         font-size: 1rem;
         box-sizing: border-box;
+        background: white;
     }
 
-    input[type="text"]:focus {
+    input:focus, select:focus, textarea:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+    }
+
+    .error-msg {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
     }
 
     @media (max-width: 600px) {

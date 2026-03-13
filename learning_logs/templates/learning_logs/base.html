@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -148,6 +149,75 @@
 
         [data-theme="dark"] .theme-toggle .sun-icon { display: block; }
         [data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+
+        /* 消息提示样式 */
+        .alert-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            animation: slideIn 0.5s ease;
+            border: 1px solid transparent;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        .alert-info {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 更多样式优化... */
+        .lang-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-full);
+            background: var(--card-bg);
+            color: var(--text-main);
+            font-size: 0.85rem;
+            cursor: pointer;
+            appearance: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: var(--transition-smooth);
+        }
+
+        .lang-select:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--primary);
+        }
+
+        [data-theme="dark"] .lang-select:hover {
+            background: rgba(30, 41, 59, 1);
+        }
 
         /* Basic Styles */
         * {
@@ -628,6 +698,24 @@
                     onblur="this.style.width='200px'; this.style.boxShadow='none';">
                 <div id="searchResults" class="search-results" style="display: none;"></div>
             </div>
+
+            <!-- 语言切换 -->
+            <div class="lang-switcher" style="position: relative;">
+                <form action="{% url 'set_language' %}" method="post" id="langForm" style="margin: 0;">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ request.get_full_path|slice:'3:' }}">
+                    <select name="language" onchange="this.form.submit()" class="lang-select">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
+                        {% for language in languages %}
+                            <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                                {{ language.name_local }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
             
             <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
                 <svg class="moon-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -640,7 +728,7 @@
             </button>
             {% if user.is_authenticated %}
             <a href="{% url 'learning_logs:topics' %}" class="nav-link">My Topics</a>
-            <a href="{% url 'accounts:profile' %}" class="nav-link">Profile</a>
+            <a href="{% url 'learning_logs:user_profile' user.username %}" class="nav-link">Profile</a>
             <form action="{% url 'accounts:logout' %}" method="post" style="display: inline; margin: 0; padding: 0;">
                 {% csrf_token %}
                 <button type="submit" class="btn-danger-text">Logout</button>
@@ -654,9 +742,9 @@
 
     <div class="container">
         {% if messages %}
-        <div style="margin-bottom: 1.5rem;">
+        <div class="alert-container">
             {% for message in messages %}
-            <div style="padding: 1rem 1.5rem; border-radius: var(--radius-md); margin-bottom: 0.5rem; {% if message.tags == 'success' %}background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent); color: var(--accent);{% elif message.tags == 'error' %}background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger);{% elif message.tags == 'warning' %}background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; color: #f59e0b;{% else %}background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); color: var(--primary);{% endif %} font-weight: 500; animation: slideIn 0.5s ease;">
+            <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
                 {{ message }}
             </div>
             {% endfor %}

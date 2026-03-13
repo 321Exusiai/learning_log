@@ -9,8 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import os
 # 导入所有模型和表单
-from .models import Topic, Entry, EntryImage, EntryAttachment, EntryRevision
-from .forms import TopicForm, EntryForm, EntryImageForm, EntryAttachmentForm
+from .models import Topic, Entry, EntryImage, EntryAttachment, EntryRevision, Like, Comment, Follow
+from .forms import TopicForm, EntryForm, EntryImageForm, EntryAttachmentForm, CommentForm
 # 导入图片压缩工具
 from .utils import compress_image
 
@@ -65,9 +65,11 @@ def search(request):
 @login_required
 def topics(request):
     """显示所有的主题（带分页、搜索和多种排序）"""
-    # 1. 获取搜索关键词 & 排序参数
+    # 1. 获取搜索关键词、排序及时间过滤参数
     search_query = request.GET.get('q', '')
-    sort = request.GET.get('sort', 'date_desc')  # date_asc/date_desc/name_asc/name_desc
+    sort = request.GET.get('sort', 'date_desc')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
 
     if sort == 'date_asc':
         order_field = 'date_added'
@@ -81,14 +83,19 @@ def topics(request):
         order_field = '-date_added'  # 默认最新优先
         sort = 'date_desc'
 
-    # 2. 先取所有数据，如果搜索词存在则过滤（排除已删除）
+    topics = Topic.objects.filter(owner=request.user, is_deleted=False)
+    
     if search_query:
-        topics = Topic.objects.filter(
-            Q(owner=request.user) & Q(is_deleted=False)
-            & (Q(text__icontains=search_query) | Q(entry__text__icontains=search_query))
-        ).distinct().order_by('-is_pinned', '-order', order_field)
-    else:
-        topics = Topic.objects.filter(owner=request.user, is_deleted=False).order_by('-is_pinned', '-order', order_field)
+        topics = topics.filter(
+            Q(text__icontains=search_query) | Q(entry__text__icontains=search_query)
+        ).distinct()
+    
+    if start_date:
+        topics = topics.filter(date_added__date__gte=start_date)
+    if end_date:
+        topics = topics.filter(date_added__date__lte=end_date)
+        
+    topics = topics.order_by('-is_pinned', '-order', order_field)
 
     # 3. 初始化分页器：每页显示 5 个主题
     paginator = Paginator(topics, 5)
@@ -119,9 +126,18 @@ def topic(request, topic_id):
     if topic.owner != request.user:
         raise Http404
 
-    # 1. 获取排序参数：date_desc / date_asc / len_asc / len_desc（排除已删除）
-    sort = request.GET.get('sort', 'date_desc')
+    # 1.5 获取时间过滤参数
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    # 2. 获取条目并应用过滤（排除已删除）
     base_entries = topic.entry_set.filter(is_deleted=False)
+    
+    if start_date:
+        base_entries = base_entries.filter(date_added__date__gte=start_date)
+    if end_date:
+        base_entries = base_entries.filter(date_added__date__lte=end_date)
+
     if sort in ('date_asc', 'asc'):
         entries = base_entries.order_by('date_added')
     elif sort == 'len_asc':
@@ -131,17 +147,23 @@ def topic(request, topic_id):
     else:
         entries = base_entries.order_by('-date_added')
 
-    # 2. 初始化分页器：每页显示 3 条笔记（你可以改成10、15）
+    # 3. 初始化分页器
     paginator = Paginator(entries, 3)
 
-    # 3. 获取当前页码
+    # 4. 获取当前页码
     page_number = request.GET.get('page', 1)
 
-    # 4. 获取当前页的笔记列表
+    # 5. 获取当前页的笔记列表
     page_obj = paginator.get_page(page_number)
 
-    # 5. 把 topic、分页对象和排序方式传给模板
-    context = {'topic': topic, 'page_obj': page_obj, 'sort': sort}
+    # 6. 把 topic、分页对象和参数传给模板
+    context = {
+        'topic': topic, 
+        'page_obj': page_obj, 
+        'sort': sort,
+        'start_date': start_date,
+        'end_date': end_date
+    }
     
     # 如果是 AJAX 请求，只返回条目列表部分
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -457,3 +479,134 @@ def toggle_pin_topic(request, topic_id):
         topic.save()
         return JsonResponse({'status': 'success', 'is_pinned': topic.is_pinned})
     return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def toggle_like(request, entry_id):
+    """切换点赞状态"""
+    if request.method == 'POST':
+        entry = get_object_or_404(Entry, id=entry_id)
+        # 检查权限：如果笔记是私人的，只有所有者可以点赞
+        if entry.visibility == 'private' and entry.topic.owner != request.user:
+            return JsonResponse({'status': 'error', 'message': '无权操作'}, status=403)
+        # 检查是否已经点赞
+        like, created = Like.objects.get_or_create(user=request.user, entry=entry)
+        if not created:
+            like.delete()
+            return JsonResponse({'status': 'success', 'liked': False, 'like_count': entry.likes.count()})
+        return JsonResponse({'status': 'success', 'liked': True, 'like_count': entry.likes.count()})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def add_comment(request, entry_id):
+    """添加评论"""
+    if request.method == 'POST':
+        entry = get_object_or_404(Entry, id=entry_id)
+        # 检查权限
+        if entry.visibility == 'private' and entry.topic.owner != request.user:
+            return JsonResponse({'status': 'error', 'message': '无权操作'}, status=403)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.entry = entry
+            parent_id = request.POST.get('parent_id')
+            if parent_id:
+                comment.parent = get_object_or_404(Comment, id=parent_id)
+            comment.save()
+            return JsonResponse({
+                'status': 'success',
+                'comment': {
+                    'id': comment.id,
+                    'user': comment.user.username,
+                    'content': comment.content,
+                    'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    'replies': []
+                }
+            })
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def follow_user(request, user_id):
+    """关注用户"""
+    if request.method == 'POST':
+        user_to_follow = get_object_or_404(User, id=user_id)
+        if user_to_follow == request.user:
+            return JsonResponse({'status': 'error', 'message': '不能关注自己'}, status=400)
+        follow, created = Follow.objects.get_or_create(follower=request.user, followed=user_to_follow)
+        if not created:
+            follow.delete()
+            return JsonResponse({'status': 'success', 'following': False, 'follower_count': user_to_follow.followers.count()})
+        return JsonResponse({'status': 'success', 'following': True, 'follower_count': user_to_follow.followers.count()})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def user_profile(request, username):
+    """用户个人资料页面"""
+    user = get_object_or_404(User, username=username)
+    topics = Topic.objects.filter(owner=user, is_deleted=False, visibility__in=['public', 'followers']).order_by('-date_added')
+    # 检查是否是关注者
+    is_following = False
+    if request.user != user:
+        is_following = Follow.objects.filter(follower=request.user, followed=user).exists()
+    # 只显示公开或对关注者可见的内容
+    public_topics = topics.filter(visibility='public')
+    if is_following:
+        follower_topics = topics.filter(visibility='followers')
+    else:
+        follower_topics = []
+    context = {
+        'profile_user': user,
+        'is_following': is_following,
+        'public_topics': public_topics,
+        'followers_count': user.followers.count(),
+        'following_count': user.following.count(),
+        'is_owner': request.user == user,
+        'follower_topics': follower_topics,
+    }
+    return render(request, 'learning_logs/user_profile.html', context)
+
+@login_required
+def global_search(request):
+    """全文搜索功能"""
+    query = request.GET.get('q', '').strip()
+    results = {
+        'topics': [],
+        'entries': [],
+        'users': []
+    }
+    if query:
+        # 搜索主题
+        topics = Topic.objects.filter(
+            Q(visibility='public') | Q(owner=request.user) | Q(visibility='followers', owner__in=request.user.following.values_list('followed_id', flat=True)),
+            Q(text__icontains=query),
+            is_deleted=False
+        ).select_related('owner')[:10]
+        results['topics'] = [{
+            'id': t.id,
+            'text': t.text,
+            'owner': t.owner.username,
+            'owner_id': t.owner.id
+        } for t in topics]
+        # 搜索笔记
+        entries = Entry.objects.filter(
+            Q(visibility='public') | Q(topic__owner=request.user) | Q(visibility='followers', topic__owner__in=request.user.following.values_list('followed_id', flat=True)),
+            Q(text__icontains=query) | Q(topic__text__icontains=query),
+            is_deleted=False
+        ).select_related('topic', 'topic__owner')[:15]
+        results['entries'] = [{
+            'id': e.id,
+            'text': e.text[:200],
+            'topic_text': e.topic.text,
+            'topic_id': e.topic.id,
+            'owner': e.topic.owner.username,
+            'owner_id': e.topic.owner.id
+        } for e in entries]
+        # 搜索用户
+        users = User.objects.filter(
+            username__icontains=query
+        ).exclude(id=request.user.id)[:5]
+        results['users'] = [{
+            'id': u.id,
+            'username': u.username
+        } for u in users]
+    return JsonResponse(results)

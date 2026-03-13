@@ -18,13 +18,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.conf.urls.i18n import i18n_patterns
 
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
+]
+
+urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('', include('learning_logs.urls')),
     path('accounts/', include('accounts.urls')),
-]
+)
 
 # 仅在开发环境（DEBUG = True）下，让Django服务媒体文件（图片、附件）
 if settings.DEBUG:

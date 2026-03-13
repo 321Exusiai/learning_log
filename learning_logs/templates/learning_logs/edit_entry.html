@@ -8,22 +8,40 @@
 
 {% block content %}
 <style>
-    .file-input {
-        margin: 1rem 0;
-        padding: 0.8rem;
-        border: 1px solid #e2e8f0;
-        border-radius: var(--radius-md);
+    .form-page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .form-back-link {
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .form-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .form-title {
+        margin-bottom: 1rem;
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    .form-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+    }
+
+    .standard-form {
         width: 100%;
-        box-sizing: border-box;
-        transition: border 0.3s ease;
     }
-    .multi-file-input {
-        background: #f8fafc;
-        border-color: #cbd5e1;
-    }
+
     .form-group {
         margin-bottom: 2rem;
     }
+
     .form-label {
         display: block;
         margin-bottom: 0.5rem;
@@ -31,42 +49,41 @@
         color: var(--text-main);
         font-size: 1.05rem;
     }
-    textarea {
-        min-height: 200px;
+
+    textarea, input[type="text"], select {
         width: 100%;
         padding: 1rem;
         border: 1px solid #e2e8f0;
         border-radius: var(--radius-md);
         font-size: 1rem;
-        resize: vertical;
         transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
     }
-    textarea:focus, .file-input:focus {
+
+    textarea {
+        min-height: 200px;
+        resize: vertical;
+    }
+
+    textarea:focus, input:focus, select:focus, .file-input:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
-    .error-message {
-        color: #ef4444;
-        font-size: 0.85rem;
-        margin-top: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
+
+    /* 多文件上传控件样式 */
+    .file-input {
+        margin: 0.5rem 0;
+        padding: 0.8rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-md);
+        width: 100%;
+        box-sizing: border-box;
+        transition: border 0.3s ease;
+        background: #f8fafc;
     }
-    .hint-text {
-        font-size: 0.85rem;
-        color: #64748b;
-        margin-top: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-    }
-    .upload-tip {
-        color: var(--primary);
-        font-size: 0.8rem;
-        margin-top: 0.3rem;
-    }
+
     /* 多文件预览样式 */
     .file-preview-container {
         display: flex;
@@ -74,6 +91,7 @@
         gap: 1rem;
         margin: 1rem 0;
     }
+
     .image-preview-card {
         width: 120px;
         height: 120px;
@@ -82,11 +100,13 @@
         overflow: hidden;
         position: relative;
     }
+
     .image-preview {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
+
     .attach-preview-card {
         padding: 0.8rem 1rem;
         border: 1px solid #e2e8f0;
@@ -97,6 +117,7 @@
         gap: 0.8rem;
         white-space: nowrap;
     }
+
     /* 文件删除按钮 */
     .file-delete-btn {
         position: absolute;
@@ -106,39 +127,91 @@
         color: white;
         border: none;
         border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        font-size: 0.7rem;
+        width: 24px;
+        height: 24px;
+        font-size: 0.9rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         opacity: 0.8;
-        transition: opacity 0.2s ease;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
+
     .file-delete-btn:hover {
         opacity: 1;
+        transform: scale(1.1);
     }
+
     .attach-delete-btn {
         background: #ef4444;
         color: white;
         border: none;
         border-radius: var(--radius-sm);
-        padding: 0.2rem 0.5rem;
-        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
         cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .attach-delete-btn:hover {
+        background: #dc2626;
+    }
+
+    .error-message {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .hint-text {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+    }
+
+    .upload-tip {
+        color: var(--primary);
+        font-size: 0.8rem;
+        margin-top: 0.3rem;
+        font-style: italic;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .checkbox-group input {
+        width: auto;
     }
 </style>
 
-<div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">
-    <a href="{% url 'learning_logs:topic' topic.id %}" class="small-link" style="margin-bottom: 1rem; display: block;">← Back to Topic</a>
+<div class="form-page-container">
+    <a href="{% url 'learning_logs:topic' topic.id %}" class="small-link form-back-link">← Back to Topic</a>
     
-    <h2 style="font-size: 2rem; margin-bottom: 1.5rem;">Edit Entry</h2>
-    {% with topic_text=topic.text %}
-    <p style="color: var(--text-muted); margin-bottom: 2rem;">Topic: <strong>{{ topic_text }}</strong></p>
-    {% endwith %}
+    <div class="form-header">
+        <h2 class="form-title">Edit Entry</h2>
+        {% with topic_text=topic.text %}
+        <p class="form-subtitle">Topic: <strong>{{ topic_text }}</strong></p>
+        {% endwith %}
+    </div>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" class="standard-form">
         {% csrf_token %}
         
         <!-- 笔记内容编辑 -->
@@ -150,6 +223,24 @@
                 <p class="error-message">⚠️ {{ error }}</p>
                 {% endfor %}
             {% endif %}
+        </div>
+
+        <!-- 纯图片笔记选项 -->
+        <div class="form-group checkbox-group">
+            {{ entry_form.is_image_only }}
+            <label for="{{ entry_form.is_image_only.id_for_label }}">
+                🖼️ 纯图片笔记
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Visibility</label>
+            {{ entry_form.visibility }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Video URL</label>
+            {{ entry_form.video_url }}
         </div>
 
         <!-- 多图片：预览已有图片 + 新增图片 -->
@@ -167,17 +258,16 @@
             <!-- 预览已有图片 -->
             {% if entry_images %}
             <div style="margin-top: 1.5rem;">
-                <p style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">已上传图片（点击❌删除）：</p>
+                <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">已上传图片（点击❌删除）：</p>
                 <div class="file-preview-container">
                     {% for img in entry_images %}
                     <div class="image-preview-card">
                         <img src="{{ img.image.url }}" alt="Entry image" class="image-preview"
                              onError="this.src='https://via.placeholder.com/120?text=Image+Lost';">
-                        <!-- 图片删除按钮 -->
-                        <form action="{% url 'learning_logs:delete_entry_image' img.id %}" method="post" onsubmit="return confirm('确定删除这张图片吗？');">
-                            {% csrf_token %}
-                            <button type="submit" class="file-delete-btn">×</button>
-                        </form>
+                        <!-- 图片删除按钮 - 使用 data-url 避免 JS 语法警告 -->
+                        <button type="button" class="file-delete-btn js-delete-btn" 
+                                data-url="{% url 'learning_logs:delete_entry_image' img.id %}"
+                                data-message="确定删除这张图片吗？">×</button>
                     </div>
                     {% endfor %}
                 </div>
@@ -200,21 +290,20 @@
             <!-- 预览已有附件 -->
             {% if entry_attachments %}
             <div style="margin-top: 1.5rem;">
-                <p style="font-size: 0.95rem; font-weight: 500; color: var(--text-main);">已上传附件（点击❌删除）：</p>
+                <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);">已上传附件（点击❌删除）：</p>
                 <div class="file-preview-container">
                     {% for attach in entry_attachments %}
                     <div class="attach-preview-card">
                         <span>📎</span>
-                        <a href="{{ attach.attachment.url }}" target="_blank" style="color: var(--primary);">
+                        <a href="{{ attach.attachment.url }}" target="_blank" style="color: var(--primary); font-weight: 500;">
                             {% with attach_name=attach.get_attachment_name %}
                             {{ attach_name|truncatechars:15 }}
                             {% endwith %}
                         </a>
-                        <!-- 附件删除按钮 -->
-                        <form action="{% url 'learning_logs:delete_entry_attachment' attach.id %}" method="post" onsubmit="return confirm('确定删除这个附件吗？');">
-                            {% csrf_token %}
-                            <button type="submit" class="attach-delete-btn">×</button>
-                        </form>
+                        <!-- 附件删除按钮 - 使用 data-url 避免 JS 语法警告 -->
+                        <button type="button" class="attach-delete-btn js-delete-btn"
+                                data-url="{% url 'learning_logs:delete_entry_attachment' attach.id %}"
+                                data-message="确定删除这个附件吗？">×</button>
                     </div>
                     {% endfor %}
                 </div>
@@ -222,10 +311,29 @@
             {% endif %}
         </div>
 
-        <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
-            <button type="submit" class="nav-btn btn-primary">Save Changes</button>
-            <a href="{% url 'learning_logs:topic' topic.id %}" class="nav-btn btn-outline">Cancel</a>
+        <div class="form-actions">
+            <button type="submit" class="nav-btn btn-primary btn-large">Save Changes</button>
+            <a href="{% url 'learning_logs:topic' topic.id %}" class="nav-btn btn-outline btn-large">Cancel</a>
         </div>
     </form>
 </div>
+
+<!-- 辅助删除的隐藏表单 -->
+<form id="deleteForm" method="post" style="display: none;">
+    {% csrf_token %}
+</form>
+
+<script>
+document.querySelectorAll('.js-delete-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const url = this.getAttribute('data-url');
+        const message = this.getAttribute('data-message');
+        if (confirm(message)) {
+            const form = document.getElementById('deleteForm');
+            form.action = url;
+            form.submit();
+        }
+    });
+});
+</script>
 {% endblock %}

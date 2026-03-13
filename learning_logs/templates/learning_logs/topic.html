@@ -194,125 +194,411 @@
         margin: 1rem 0;
     }
 
-    /* 背景纹理 */
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: 
-            radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
-        pointer-events: none;
-        z-index: -1;
+    /* 社交交互样式 */
+    .interaction-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    /* 网格纹理叠加 */
-    body::after {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
+    .social-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: var(--text-muted);
+        transition: var(--transition-smooth);
+        padding: 0.4rem 0.6rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .social-btn:hover {
+        background: rgba(0, 0, 0, 0.03);
+    }
+
+    .social-btn svg {
+        transition: transform 0.2s ease;
+    }
+
+    .social-btn:active svg {
+        transform: scale(0.8);
+    }
+
+    .like-btn.liked {
+        color: var(--secondary);
+    }
+
+    .comments-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+        display: none; /* 默认隐藏 */
+    }
+
+    .comment-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .comment-user {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .comment-date {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .comment-content {
+        margin: 0.3rem 0;
+        font-size: 0.95rem;
+    }
+
+    .replies-container {
+        margin-left: 2rem;
+        margin-top: 0.5rem;
+        border-left: 2px solid rgba(99, 102, 241, 0.1);
+        padding-left: 1rem;
+    }
+
+    .reply-item {
+        margin-top: 0.5rem;
+    }
+
+    .comment-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .comment-input {
+        min-height: 80px;
+        font-size: 0.9rem;
+        padding: 0.8rem;
         width: 100%;
-        height: 100%;
-        background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 50px 50px;
-        pointer-events: none;
-        z-index: -1;
+        box-sizing: border-box;
+    }
+
+    /* 布局容器 */
+    .topic-page-container {
+        padding: 0 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .topic-header {
+        margin-bottom: 3rem;
+    }
+
+    .topic-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .topic-title-area {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .topic-main-title {
+        font-size: 2.5rem;
+        margin: 0 0 1.5rem 0;
+        line-height: 1.2;
+        font-weight: 800;
+        background: linear-gradient(90deg, var(--text-main) 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .topic-badge {
+        display: inline-block;
+        margin-bottom: 0.75rem;
+        background: rgba(236, 72, 153, 0.1);
+        color: var(--secondary);
+        padding: 0.4rem 0.8rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .topic-actions-group {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .export-group {
+        display: flex;
+        gap: 0.4rem;
+    }
+
+    /* 条目卡片样式优化 */
+    .entry-card {
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        background: white;
+        border: 1px solid rgba(0,0,0,0.03);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition-smooth);
+        position: relative;
+    }
+
+    .entry-card:hover {
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-light);
+    }
+
+    .entry-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.2rem;
+        border-bottom: 1px dashed #e2e8f0;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .entry-date {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .entry-actions {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+    }
+
+    .entry-content {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: var(--text-main);
+    }
+
+    .entry-media {
+        margin-top: 2rem;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 1.5rem;
+    }
+
+    .media-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+
+    .video-container {
+        margin-top: 1.5rem;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        aspect-ratio: 16 / 9;
+    }
+
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, min-max(180px, 1fr));
+        gap: 1rem;
+    }
+
+    .entry-image-thumb {
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        transition: transform 0.3s;
+    }
+
+    .entry-image-thumb:hover {
+        transform: scale(1.02);
+    }
+
+    .attachment-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+
+    /* 日期选择器美化 */
+    .date-filter-group {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.4rem 1rem;
+        background: var(--glass-bg);
+        border-radius: var(--radius-full);
+        border: 1px solid var(--glass-border);
+    }
+
+    .date-input {
+        padding: 0.3rem 0.5rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid #e2e8f0;
+        font-size: 0.85rem;
+        background: white;
+    }
+
+    /* 分页美化 */
+    .pagination-bar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.8rem;
+        margin: 4rem 0;
+        flex-wrap: wrap;
+    }
+
+    .page-info {
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .btn-small {
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
     }
 </style>
 
-<!-- 顶部区域 -->
-<div style="margin-bottom: 3rem; padding: 0 2rem;">
-    <a href="{% url 'learning_logs:topics' %}" class="small-link" style="margin-bottom: 1rem; display: block;">← Back to
-        All Topics</a>
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
-        <div>
-            <span class="badge"
-                style="margin-bottom: 0.75rem; background: rgba(236, 72, 153, 0.1); color: var(--secondary); padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); font-size: 0.85rem;">📌
-                Topic Details</span>
-            {% with topic_text=topic.text %}
-            <h2 style="font-size: 2.5rem; margin: 0; line-height: 1.2;">{{ topic_text }}</h2>
-            {% endwith %}
+<div class="topic-page-container" 
+     data-topic-id="{{ topic.id }}" 
+     data-topic-title="{{ topic.text|escapejs }}">
+    <!-- 顶部导航 -->
+    <div class="topic-header">
+        <a href="{% url 'learning_logs:topics' %}" class="small-link form-back-link">← Back to All Subjects</a>
+        
+        <div class="topic-header-top">
+            <div class="topic-title-area">
+                <span class="topic-badge">📌 Subject Details</span>
+                <h2 class="topic-main-title">{{ topic.text }}</h2>
 
-            <!-- 排序条：亚克力滑动效果 -->
-            <div class="sort-bar">
-                <span class="sort-label">排序：</span>
-                <div class="sort-container" id="sortContainer">
-                    <div class="sort-slider" id="sortSlider"></div>
-                    <a href="?sort=date_desc" data-sort="date_desc"
-                        class="sort-pill {% if sort == 'date_desc' or sort == 'desc' or not sort %}sort-pill-active{% endif %}">最新在前</a>
-                    <a href="?sort=date_asc" data-sort="date_asc"
-                        class="sort-pill {% if sort == 'date_asc' or sort == 'asc' %}sort-pill-active{% endif %}">最早在前</a>
-                    <a href="?sort=len_asc" data-sort="len_asc"
-                        class="sort-pill {% if sort == 'len_asc' %}sort-pill-active{% endif %}">内容短→长</a>
-                    <a href="?sort=len_desc" data-sort="len_desc"
-                        class="sort-pill {% if sort == 'len_desc' %}sort-pill-active{% endif %}">内容长→短</a>
+                <!-- 排序与过滤条 -->
+                <div class="sort-bar">
+                    <span class="sort-label">排序：</span>
+                    <div class="sort-container" id="sortContainer">
+                        <div class="sort-slider" id="sortSlider"></div>
+                        <a href="?sort=date_desc&start_date={{ start_date|default:'' }}&end_date={{ end_date|default:'' }}" 
+                           data-sort="date_desc"
+                           class="sort-pill {% if sort == 'date_desc' or sort == 'desc' or not sort %}sort-pill-active{% endif %}">最新</a>
+                        <a href="?sort=date_asc&start_date={{ start_date|default:'' }}&end_date={{ end_date|default:'' }}" 
+                           data-sort="date_asc"
+                           class="sort-pill {% if sort == 'date_asc' or sort == 'asc' %}sort-pill-active{% endif %}">最早</a>
+                        <a href="?sort=len_asc&start_date={{ start_date|default:'' }}&end_date={{ end_date|default:'' }}" 
+                           data-sort="len_asc"
+                           class="sort-pill {% if sort == 'len_asc' %}sort-pill-active{% endif %}">短文</a>
+                        <a href="?sort=len_desc&start_date={{ start_date|default:'' }}&end_date={{ end_date|default:'' }}" 
+                           data-sort="len_desc"
+                           class="sort-pill {% if sort == 'len_desc' %}sort-pill-active{% endif %}">长文</a>
+                    </div>
+                    
+                    <div class="date-filter-group">
+                        <span class="sort-label">时间范围：</span>
+                        <input type="date" id="start_date" value="{{ start_date|default:'' }}" class="date-input">
+                        <span>至</span>
+                        <input type="date" id="end_date" value="{{ end_date|default:'' }}" class="date-input">
+                        <button id="applyFilter" class="nav-btn btn-outline btn-small">应用</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="topic-actions-group">
+                <a href="{% url 'learning_logs:new_entry' topic.id %}" class="nav-btn btn-primary">Add New Entry</a>
+                <div class="export-group">
+                    <button onclick="exportEntries('txt')" class="nav-btn btn-outline btn-small" title="Export as TXT">📄 TXT</button>
+                    <button onclick="exportEntries('md')" class="nav-btn btn-outline btn-small" title="Export as Markdown">📝 MD</button>
+                    <button onclick="exportEntries('pdf')" class="nav-btn btn-outline btn-small" title="Export as PDF">📕 PDF</button>
+                    <a href="{% url 'learning_logs:share_topic' topic.id %}" target="_blank" class="nav-btn btn-outline btn-small">📤 分享</a>
                 </div>
             </div>
         </div>
-        {% with topic_id=topic.id %}
-        <a href="{% url 'learning_logs:new_entry' topic_id %}" class="nav-btn btn-primary"
-            style="white-space: nowrap;">Add New Entry</a>
-        <div style="display: flex; gap: 0.5rem; margin-left: 0.5rem;">
-            <button onclick="exportEntries('txt')" class="nav-btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📄 TXT</button>
-            <button onclick="exportEntries('md')" class="nav-btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📝 MD</button>
-            <button onclick="exportEntries('pdf')" class="nav-btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📕 PDF</button>
-            <a href="{% url 'learning_logs:share_topic' topic_id %}" target="_blank" class="nav-btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">📤 分享</a>
-        </div>
-        {% endwith %}
     </div>
-</div>
 
-<!-- 条目列表 -->
-<div id="entriesContainer" class="entries-container" style="display: flex; flex-direction: column; gap: 2rem; padding: 0 2rem; max-width: 1200px; margin: 0 auto;">
+    <!-- 条目列表 -->
+    <div id="entriesContainer" class="entries-container">
     {% for entry in page_obj.object_list %}
-    <div class="card"
-        style="padding: 2.5rem; border: 1px solid rgba(0,0,0,0.03); background: white; border-radius: var(--radius-lg); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <div
-            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 1rem;">
+    <div class="entry-card">
+        <div class="entry-header">
             <!-- 日期 -->
-            {% with entry_date=entry.date_added|date:"Y年m月d日 H:i" %}
-            <p class="entry-date" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin: 0;">{{ entry_date }}</p>
-            {% endwith %}
+            <div class="entry-date">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                {{ entry.date_added|date:"Y年m月d日 H:i" }}
+            </div>
 
             <!-- 操作按钮 -->
-            <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="entry-actions">
                 {% with topic_id=topic.id entry_id=entry.id %}
-                <a href="{% url 'learning_logs:edit_entry' topic_id entry_id %}" class="small-link"
-                    style="font-size: 0.8rem;">Edit Entry</a>
-                <a href="{% url 'learning_logs:entry_revisions' topic_id entry_id %}" class="small-link"
-                    style="font-size: 0.8rem;">📜 History</a>
-                <form action="{% url 'learning_logs:delete_entry' topic_id entry_id %}" method="post"
-                    style="display: inline;" onsubmit="return confirm('确定要删除这条笔记吗？删除后无法恢复！');">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-btn btn-danger"
-                        style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Delete Entry</button>
-                </form>
+                <div class="interaction-bar">
+                    <button class="social-btn like-btn {% if entry|has_liked:user %}liked{% endif %}" data-id="{{ entry_id }}" title="Like">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="{% if entry|has_liked:user %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <span class="like-count">{{ entry.likes.count }}</span>
+                    </button>
+                    <button class="social-btn comment-toggle" data-id="{{ entry_id }}" title="Comments">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>{{ entry.comments.count }}</span>
+                    </button>
+                </div>
+                <div class="entry-context-menu">
+                    <a href="{% url 'learning_logs:edit_entry' topic_id entry_id %}" class="small-link">Edit</a>
+                    <a href="{% url 'learning_logs:entry_revisions' topic_id entry_id %}" class="small-link" title="View History">📜 History</a>
+                    <form action="{% url 'learning_logs:delete_entry' topic_id entry_id %}" method="post"
+                        class="inline-form" onsubmit="return confirm('确定要删除这条笔记吗？删除后无法恢复！');">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-btn btn-danger btn-small">Delete</button>
+                    </form>
+                </div>
                 {% endwith %}
             </div>
         </div>
 
         <!-- 笔记文本 (Markdown 渲染) -->
         {% if not entry.is_image_only %}
-        {% with entry_text=entry.text %}
-        <div class="markdown-content" style="font-size: 1.05rem; line-height: 1.8; color: var(--text-main);">{{ entry_text|markdown }}</div>
-        {% endwith %}
+        <div class="entry-content">{{ entry.text|markdown }}</div>
         {% endif %}
 
-        <!-- 新增：多图片预览 -->
+        <!-- 视频嵌入 -->
+        {% if entry.video_url %}
+        <div class="video-container">
+            <iframe width="100%" height="100%" src="{{ entry.video_url|video_embed }}" frameborder="0" allowfullscreen></iframe>
+        </div>
+        {% endif %}
+
+        <!-- 多图片预览 -->
         {% with entry_images=entry.images.all %}
         {% if entry_images %}
-        <div style="margin-top: 2rem; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
-            <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-muted); margin: 0 0 1rem 0;">Attached Images ({{ entry_images|length }}):</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <div class="entry-media">
+            <p class="media-title">Attached Images ({{ entry_images|length }}):</p>
+            <div class="image-grid">
                 {% for img in entry_images %}
-                <div style="max-width: 200px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid #e2e8f0;">
+                <div class="entry-image-thumb">
                     <img src="{{ img.image.url }}" alt="Entry image" style="width: 100%; height: auto;"
                          onError="this.src='https://via.placeholder.com/200x150?text=Image+Lost';">
                 </div>
@@ -322,14 +608,14 @@
         {% endif %}
         {% endwith %}
 
-        <!-- 新增：多附件预览 -->
+        <!-- 多附件预览 -->
         {% with entry_attachments=entry.attachments.all %}
         {% if entry_attachments %}
-        <div style="margin-top: 2rem; border-top: 1px solid #f1f5f9; padding-top: 2rem;">
-            <p style="font-size: 0.95rem; font-weight: 600; color: var(--text-muted); margin: 0 0 1rem 0;">Attached Files ({{ entry_attachments|length }}):</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <div class="entry-media">
+            <p class="media-title">Attached Files ({{ entry_attachments|length }}):</p>
+            <div class="attachment-list">
                 {% for attach in entry_attachments %}
-                <a href="{{ attach.attachment.url }}" target="_blank" class="nav-btn btn-outline" style="padding: 0.6rem 1rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <a href="{{ attach.attachment.url }}" target="_blank" class="nav-btn btn-outline btn-small">
                     📎 {% with attach_name=attach.get_attachment_name %}{{ attach_name|truncatechars:20 }}{% endwith %}
                 </a>
                 {% endfor %}
@@ -337,51 +623,85 @@
         </div>
         {% endif %}
         {% endwith %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- 评论区 -->
+        <div id="comments-{{ entry.id }}" class="comments-section">
+            <div class="comments-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 1.5rem;">
+                {% for comment in entry.comments.all %}
+                    {% if not comment.parent %}
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-user">{{ comment.user.username }}</span>
+                            <span class="comment-date">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
+                        </div>
+                        <p class="comment-content">{{ comment.content }}</p>
+                        <button class="reply-btn small-link" data-comment-id="{{ comment.id }}" data-user="{{ comment.user.username }}">回复</button>
+                        
+                        <!-- 回复列表 -->
+                        <div class="replies-container">
+                            {% for reply in comment.replies.all %}
+                            <div class="reply-item">
+                                <div class="comment-header">
+                                    <span class="comment-user" style="font-size: 0.85rem;">{{ reply.user.username }}</span>
+                                    <span class="comment-date" style="font-size: 0.7rem;">{{ reply.created_at|date:"Y-m-d H:i" }}</span>
+                                </div>
+                                <p class="comment-content" style="font-size: 0.9rem;">{{ reply.content }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">暂无评论</p>
+                {% endfor %}
+            </div>
+            
+            <form class="comment-form" data-entry-id="{{ entry.id }}">
+                {% csrf_token %}
+                <input type="hidden" name="parent_id" class="parent-id-input">
+                <div class="reply-to-info" style="display: none; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">
+                    正在回复 <span class="reply-user"></span> 
+                    <button type="button" class="cancel-reply" style="background: none; border: none; color: var(--danger); cursor: pointer;">取消</button>
+                </div>
+                <textarea name="content" placeholder="发表你的评论..." required class="comment-input"></textarea>
+                <button type="submit" class="nav-btn btn-primary" style="align-self: flex-end; padding: 0.5rem 1.2rem; font-size: 0.85rem;">发表评论</button>
+            </form>
+        </div>
     </div>
     {% empty %}
     <!-- 空状态 -->
-    <div
-        style="text-align: center; padding: 4rem 2rem; background: rgba(0,0,0,0.02); border-radius: var(--radius-lg); border: 2px dashed #e2e8f0;">
-        <p style="font-size: 1.1rem; color: var(--text-muted); margin: 0 0 1rem 0;">No entries added for this topic yet.
-        </p>
-        {% with topic_id=topic.id %}
-        <a href="{% url 'learning_logs:new_entry' topic_id %}" class="nav-btn btn-outline"
-            style="margin-top: 1rem; display: inline-block;">Add your first entry</a>
-        {% endwith %}
+    <div class="empty-state">
+        <p class="empty-state-text">No entries added for this subject yet.</p>
+        <a href="{% url 'learning_logs:new_entry' topic.id %}" class="nav-btn btn-outline">Add your first entry</a>
     </div>
     {% endfor %}
 </div>
 
 <!-- 分页控件 -->
 {% if page_obj.has_other_pages %}
-<div
-    style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 3rem; padding: 0 1rem; flex-wrap: wrap;">
+<div class="pagination-bar">
     {% if page_obj.has_previous %}
-    <a href="?sort={{ sort }}&page=1" class="nav-btn btn-outline"
-        style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">首页</a>
+    <a href="?sort={{ sort }}&page=1" class="nav-btn btn-outline btn-small">首页</a>
     {% with prev_page=page_obj.previous_page_number %}
-    <a href="?sort={{ sort }}&page={{ prev_page }}" class="nav-btn btn-outline"
-        style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">上一页</a>
+    <a href="?sort={{ sort }}&page={{ prev_page }}" class="nav-btn btn-outline btn-small">上一页</a>
     {% endwith %}
     {% endif %}
 
-    {% with current_page=page_obj.number total_pages=page_obj.paginator.num_pages %}
-    <span
-        style="padding: 0.5rem 1rem; font-size: 0.9rem; color: var(--text-main); font-weight: 600; white-space: nowrap;">
-        第 {{ current_page }} 页 / 共 {{ total_pages }} 页
+    <span class="page-info">
+        第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页
     </span>
-    {% endwith %}
 
     {% if page_obj.has_next %}
     {% with next_page=page_obj.next_page_number last_page=page_obj.paginator.num_pages %}
-    <a href="?sort={{ sort }}&page={{ next_page }}" class="nav-btn btn-outline"
-        style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">下一页</a>
-    <a href="?sort={{ sort }}&page={{ last_page }}" class="nav-btn btn-outline"
-        style="padding: 0.5rem 1rem; font-size: 0.9rem; white-space: nowrap;">末页</a>
+    <a href="?sort={{ sort }}&page={{ next_page }}" class="nav-btn btn-outline btn-small">下一页</a>
+    <a href="?sort={{ sort }}&page={{ last_page }}" class="nav-btn btn-outline btn-small">末页</a>
     {% endwith %}
     {% endif %}
 </div>
 {% endif %}
+</div> <!-- 关闭 topic-page-container -->
 
 <!-- 排序滑动动画脚本 -->
 <script>
@@ -404,6 +724,104 @@
             slider.style.opacity = '1';
         }
     }
+    
+    // 点赞处理
+    document.addEventListener('click', function(e) {
+        const likeBtn = e.target.closest('.like-btn');
+        if (likeBtn) {
+            const entryId = likeBtn.getAttribute('data-id');
+            fetch(`/toggle_like/${entryId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    const icon = likeBtn.querySelector('svg');
+                    const count = likeBtn.querySelector('.like-count');
+                    
+                    if (data.liked) {
+                        likeBtn.classList.add('liked');
+                        likeBtn.style.color = 'var(--secondary)';
+                        icon.setAttribute('fill', 'currentColor');
+                    } else {
+                        likeBtn.classList.remove('liked');
+                        likeBtn.style.color = 'var(--text-muted)';
+                        icon.setAttribute('fill', 'none');
+                    }
+                    count.textContent = data.count;
+                }
+            });
+        }
+        
+        // 评论区切换
+        const commentToggle = e.target.closest('.comment-toggle');
+        if (commentToggle) {
+            const entryId = commentToggle.getAttribute('data-id');
+            const section = document.getElementById(`comments-${entryId}`);
+            if (section) {
+                const isHidden = section.style.display === 'none';
+                section.style.display = isHidden ? 'block' : 'none';
+                if (isHidden) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+        
+        // 回复按钮处理
+        const replyBtn = e.target.closest('.reply-btn');
+        if (replyBtn) {
+            const commentId = replyBtn.getAttribute('data-comment-id');
+            const userName = replyBtn.getAttribute('data-user');
+            const form = replyBtn.closest('.comments-section').querySelector('.comment-form');
+            const parentInput = form.querySelector('.parent-id-input');
+            const info = form.querySelector('.reply-to-info');
+            const userSpan = info.querySelector('.reply-user');
+            
+            parentInput.value = commentId;
+            userSpan.textContent = userName;
+            info.style.display = 'block';
+            form.querySelector('textarea').focus();
+        }
+        
+        // 取消回复按钮
+        const cancelReply = e.target.closest('.cancel-reply');
+        if (cancelReply) {
+            const form = cancelReply.closest('.comment-form');
+            form.querySelector('.parent-id-input').value = '';
+            form.querySelector('.reply-to-info').style.display = 'none';
+        }
+    });
+
+    // 评论提交处理
+    document.addEventListener('submit', function(e) {
+        const form = e.target.closest('.comment-form');
+        if (form) {
+            e.preventDefault();
+            const entryId = form.getAttribute('data-entry-id');
+            const formData = new FormData(form);
+            
+            fetch(`/add_comment/${entryId}/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    // 简单起见，这里直接刷新评论区内容或者重新获取 HTML
+                    location.reload(); // 也可以用更优雅的 DOM 操作更新
+                } else {
+                    alert(data.message || '发表评论失败');
+                }
+            });
+        }
+    });
     
     // 初始化 - 找到当前激活的按钮
     const initialActive = container.querySelector('.sort-pill-active');
@@ -434,7 +852,15 @@
             entriesContainer.classList.add('loading');
             
             // 使用 AJAX 获取新数据
-            fetch(`?sort=${sortValue}`, {
+            const urlParams = new URLSearchParams(window.location.search);
+            const start_date = document.getElementById('start_date').value;
+            const end_date = document.getElementById('end_date').value;
+            
+            let targetUrl = `?sort=${sortValue}`;
+            if (start_date) targetUrl += `&start_date=${start_date}`;
+            if (end_date) targetUrl += `&end_date=${end_date}`;
+
+            fetch(targetUrl, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
@@ -461,7 +887,9 @@
                         entriesContainer.style.transform = 'translateY(0)';
                         
                         // 更新 URL（不刷新页面）
-                        history.pushState({ sort: sortValue }, '', `?sort=${sortValue}`);
+                        history.pushState({ sort: sortValue, start_date, end_date }, '', targetUrl);
+                        
+                        // 重新初始化某些功能（如图片灯箱等，如果有的话）
                     }, 200);
                 }
             })
@@ -479,6 +907,23 @@
         const activePill = container.querySelector('.sort-pill-active');
         updateSlider(activePill);
     });
+
+    // 时间过滤应用按钮
+    const applyBtn = document.getElementById('applyFilter');
+    if (applyBtn) {
+        applyBtn.addEventListener('click', function() {
+            const sortPill = container.querySelector('.sort-pill-active');
+            const sortValue = sortPill ? sortPill.getAttribute('data-sort') : 'date_desc';
+            const start_date = document.getElementById('start_date').value;
+            const end_date = document.getElementById('end_date').value;
+            
+            let targetUrl = `?sort=${sortValue}`;
+            if (start_date) targetUrl += `&start_date=${start_date}`;
+            if (end_date) targetUrl += `&end_date=${end_date}`;
+            
+            window.location.href = targetUrl;
+        });
+    }
     
     // 浏览器前进/后退按钮处理
     window.addEventListener('popstate', function(e) {
@@ -514,32 +959,32 @@
         });
     });
     
-    // 导出笔记功能
-    function exportEntries(format) {
-        const topicId = {{ topic.id }};
+    // 导出笔记功能 - 暴露给全局以便 HTML 调用
+    window.exportEntries = function(format) {
+        const pageContainer = document.querySelector('.topic-page-container');
+        const topicTitle = pageContainer.getAttribute('data-topic-title');
         let content = '';
-        let filename = '{{ topic.text|escapejs }}_' + new Date().toISOString().slice(0,10);
+        let filename = topicTitle + '_' + new Date().toISOString().slice(0,10);
         let mimeType = 'text/plain';
-        let extension = format;
         
         // 获取所有笔记内容
-        const entries = document.querySelectorAll('.card');
+        const entries = document.querySelectorAll('.entry-card');
         
         if (format === 'txt') {
             entries.forEach((entry, index) => {
-                const date = entry.querySelector('.entry-date')?.textContent || '';
-                const textContent = entry.querySelector('.markdown-content')?.innerText || '';
+                const date = entry.querySelector('.entry-date')?.textContent.trim() || '';
+                const textContent = entry.querySelector('.entry-content')?.innerText || '';
                 if (textContent.trim()) {
                     content += `=== 笔记 ${index + 1} (${date}) ===\n\n${textContent}\n\n${'='.repeat(30)}\n\n`;
                 }
             });
             filename += '.txt';
         } else if (format === 'md') {
-            content += `# {{ topic.text|escapejs }}\n\n`;
+            content += `# ${topicTitle}\n\n`;
             content += `> 导出日期: ${new Date().toLocaleDateString('zh-CN')}\n\n---\n\n`;
             entries.forEach((entry, index) => {
-                const date = entry.querySelector('.entry-date')?.textContent || '';
-                const textContent = entry.querySelector('.markdown-content')?.innerText || '';
+                const date = entry.querySelector('.entry-date')?.textContent.trim() || '';
+                const textContent = entry.querySelector('.entry-content')?.innerText || '';
                 if (textContent.trim()) {
                     content += `## 笔记 ${index + 1}\n\n`;
                     content += `*${date}*\n\n`;
@@ -549,11 +994,11 @@
             filename += '.md';
             mimeType = 'text/markdown';
         } else if (format === 'pdf') {
-            // PDF 导出 - 使用浏览器打印功能
-            const printContent = `
+            // PDF 导出 - 保持原样但更新选择器
+            let printContent = `
                 <html>
                 <head>
-                    <title>{{ topic.text|escapejs }}</title>
+                    <title>${topicTitle}</title>
                     <style>
                         body { font-family: 'Noto Sans SC', sans-serif; padding: 40px; }
                         h1 { color: #333; }
@@ -563,13 +1008,13 @@
                     </style>
                 </head>
                 <body>
-                    <h1>{{ topic.text|escapejs }}</h1>
+                    <h1>${topicTitle}</h1>
                     <p>导出日期: ${new Date().toLocaleDateString('zh-CN')}</p>
                     <hr>
             `;
             entries.forEach((entry, index) => {
-                const date = entry.querySelector('.entry-date')?.textContent || '';
-                const textContent = entry.querySelector('.markdown-content')?.innerText || '';
+                const date = entry.querySelector('.entry-date')?.textContent.trim() || '';
+                const textContent = entry.querySelector('.entry-content')?.innerText || '';
                 if (textContent.trim()) {
                     printContent += `<div class="entry"><h3>笔记 ${index + 1}</h3><p class="date">${date}</p><div class="content">${textContent.replace(/\n/g, '<br>')}</div></div>`;
                 }
@@ -579,7 +1024,9 @@
             const printWindow = window.open('', '_blank');
             printWindow.document.write(printContent);
             printWindow.document.close();
-            printWindow.print();
+            setTimeout(() => {
+                printWindow.print();
+            }, 500);
             return;
         }
         
@@ -591,7 +1038,7 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }
+    };
 })();
 </script>
 {% endblock %}

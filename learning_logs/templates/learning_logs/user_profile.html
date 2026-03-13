@@ -1,0 +1,227 @@
+{% extends 'learning_logs/base.html' %}
+
+{% block title %}Profile: {{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- 用户信息卡片 -->
+    <div class="card profile-header-card">
+        <div class="profile-header-content">
+            <div class="profile-info">
+                <div class="avatar-placeholder">
+                    {{ profile_user.username|first|upper }}
+                </div>
+                <div>
+                    <h2 class="profile-username">{{ profile_user.username }}</h2>
+                    <p class="profile-joined">Joined {{ profile_user.date_joined|date:"M Y" }}</p>
+                    <div class="profile-stats">
+                        <span class="stat-item"><strong>{{ followers_count }}</strong> Followers</span>
+                        <span class="stat-item"><strong>{{ following_count }}</strong> Following</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if user.is_authenticated and user != profile_user %}
+                <div class="profile-actions">
+                    <button id="follow-btn" data-username="{{ profile_user.username }}" 
+                        class="nav-btn {% if is_following %}btn-outline{% else %}btn-primary{% endif %}">
+                        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                    </button>
+                    {% csrf_token %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 公开主题列表 -->
+    <div class="profile-topics-section">
+        <h3 class="section-title">📚 Public Topics</h3>
+        <div class="topics-grid">
+            {% for topic in public_topics %}
+                <a href="{% url 'learning_logs:topic' topic.id %}" class="card topic-profile-card">
+                    <div class="card-icon-emoji">📁</div>
+                    <h4 class="topic-title">{{ topic.text }}</h4>
+                    <span class="topic-date">{{ topic.date_added|date:"M d, Y" }}</span>
+                    <span class="badge-public">Public</span>
+                </a>
+            {% empty %}
+                <div class="empty-state">
+                    <p class="empty-state-text">No public topics found.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .profile-header-card {
+        padding: 2.5rem;
+        margin-bottom: 3rem;
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%);
+    }
+
+    .profile-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .profile-info {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        background: var(--primary);
+        color: white;
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 700;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .profile-username {
+        font-size: 2.5rem;
+        margin-bottom: 0.25rem;
+        background: linear-gradient(90deg, var(--text-main) 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .profile-joined {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .profile-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .stat-item {
+        font-size: 1.1rem;
+        color: var(--text-main);
+    }
+
+    .stat-item strong {
+        color: var(--primary);
+        font-size: 1.35rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        font-weight: 700;
+    }
+
+    .topics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .topic-profile-card {
+        padding: 1.5rem;
+        transition: var(--transition-smooth);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        position: relative;
+    }
+
+    .topic-profile-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .topic-date {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 1rem;
+    }
+
+    .badge-public {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 0.75rem;
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        padding: 0.2rem 0.6rem;
+        border-radius: var(--radius-sm);
+    }
+
+    @media (max-width: 600px) {
+        .profile-header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .profile-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            font-size: 2.5rem;
+        }
+        .profile-actions {
+            width: 100%;
+        }
+        .profile-actions button {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const followBtn = document.getElementById('follow-btn');
+    if (followBtn) {
+        followBtn.addEventListener('click', function() {
+            const username = this.getAttribute('data-username');
+            fetch(`/toggle_follow/${username}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    if (data.following) {
+                        this.textContent = 'Unfollow';
+                        this.classList.remove('btn-primary');
+                        this.classList.add('btn-outline');
+                    } else {
+                        this.textContent = 'Follow';
+                        this.classList.remove('btn-outline');
+                        this.classList.add('btn-primary');
+                    }
+                    location.reload(); 
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock content %}

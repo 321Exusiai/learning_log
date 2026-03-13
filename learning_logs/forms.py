@@ -1,6 +1,6 @@
 # learning_logs/forms.py
 from django import forms
-from .models import Topic, Entry, EntryImage, EntryAttachment
+from .models import Topic, Entry, EntryImage, EntryAttachment, Comment
 
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
 ALLOWED_ATTACHMENT_TYPES = [
@@ -27,16 +27,17 @@ def validate_file_size(file, max_size):
 class TopicForm(forms.ModelForm):
     class Meta:
         model = Topic
-        fields = ['text', 'cover_style', 'cover_image']
-        labels = {'text': '', 'cover_style': '封面样式', 'cover_image': '封面图片'}
+        fields = ['text', 'cover_style', 'cover_image', 'visibility']
+        labels = {'text': '', 'cover_style': '封面样式', 'cover_image': '封面图片', 'visibility': '可见性'}
 
 class EntryForm(forms.ModelForm):
     class Meta:
         model = Entry
-        fields = ['text', 'is_image_only']
-        labels = {'text': '', 'is_image_only': '纯图片笔记'}
+        fields = ['text', 'is_image_only', 'visibility', 'video_url']
+        labels = {'text': '', 'is_image_only': '纯图片笔记', 'visibility': '可见性', 'video_url': '视频链接'}
         widgets = {
             'text': forms.Textarea(attrs={'cols': 80, 'rows': 10, 'placeholder': '输入笔记内容...'}),
+            'video_url': forms.URLInput(attrs={'placeholder': '输入视频链接（支持YouTube、B站等）'}),
         }
 
 class MultiFileInput(forms.FileInput):
@@ -90,3 +91,13 @@ class EntryAttachmentForm(forms.Form):
             if not validate_file_size(attachment, MAX_FILE_SIZE):
                 raise forms.ValidationError(f'文件大小超过限制 (50MB): {attachment.name}')
         return attachments
+
+class CommentForm(forms.ModelForm):
+    """评论表单"""
+    class Meta:
+        model = Comment
+        fields = ['content']
+        labels = {'content': ''}
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 3, 'placeholder': '写下你的评论...', 'class': 'comment-input'})
+        }

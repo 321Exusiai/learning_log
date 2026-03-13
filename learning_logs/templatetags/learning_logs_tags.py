@@ -43,3 +43,38 @@ def highlight_filter(text, query):
         escaped_text
     )
     return mark_safe(highlighted)
+
+@register.filter(name='video_embed')
+def video_embed(url):
+    """
+    将普通视频链接转换为嵌入链接(针对Bilibili/Youtube)
+    """
+    if not url:
+        return ""
+    
+    # Bilibili
+    if 'bilibili.com' in url:
+        import re
+        bv_match = re.search(r'BV[a-zA-Z0-9]+', url)
+        if bv_match:
+            bv = bv_match.group()
+            return f"https://player.bilibili.com/player.html?bvid={bv}&page=1&high_quality=1&danmaku=0"
+    
+    # Youtube
+    if 'youtube.com' in url or 'youtu.be' in url:
+        import re
+        yt_match = re.search(r'(?:v=|\/)([0-9A-Za-z_-]{11})', url)
+        if yt_match:
+            v_id = yt_match.group(1)
+            return f"https://www.youtube.com/embed/{v_id}"
+            
+    return url
+
+@register.filter(name='has_liked')
+def has_liked(entry, user):
+    """
+    判断用户是否已经点赞了该笔记
+    """
+    if user.is_anonymous:
+        return False
+    return entry.likes.filter(user=user).exists()
